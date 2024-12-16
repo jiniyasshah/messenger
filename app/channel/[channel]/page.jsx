@@ -190,29 +190,34 @@ export default function ChatBox() {
           >
             <div className="flex flex-col items-end  ">
               {msg.type === "text" && (
-                <p className="flex flex-row items-center gap-x-2 bg-gray-700 p-2 rounded-lg max-w-xs">
-                  {msg.content.includes("http") ? (
-                    <Link
-                      href={msg.content}
-                      target="_blank"
-                      className="text-blue-400 underline"
-                    >
-                      {msg.content}
-                    </Link>
-                  ) : (
-                    msg.content
+             <div>
+                  <p className="flex flex-row items-center justify-between gap-x-2 bg-gray-700 p-2 rounded-lg max-w-xs">
+                    {msg.content.includes("http") ? (
+                      <Link
+                        href={msg.content}
+                        target="_blank"
+                        className="text-blue-400 underline"
+                      >
+                        {msg.content}
+                      </Link>
+                    ) : (
+                      msg.content
+                    )}
+                    {msg.username === username &&
+                      (msg.status === "sent" ? (
+                        <IoMdCheckmarkCircle />
+                      ) : msg.status === "sending" ? (
+                        <MdOutlineRadioButtonUnchecked />
+                      ) : (
+                        <RxCrossCircled />
+                      ))}
+                  </p>
+                  {clickedMessageId === msg.id && ( // Conditionally render based on clicked message ID
+                    <p className="text-sm text-gray-400">
+                      {msg.username} - {msg.timestamp}
+                    </p>
                   )}
-                  {msg.username === username && (
-  msg.status === "sent" ? (
-    <IoMdCheckmarkCircle  />
-  ) : msg.status === "sending" ? (
-    <MdOutlineRadioButtonUnchecked  />
-  ) : (
-    <RxCrossCircled  />
-  )
-)}
-
-                </p>
+                </div>
               )}
               {msg.type === "image" && (
                 <div className="relative">
@@ -259,17 +264,7 @@ export default function ChatBox() {
                   </div>
                 </div>
               )}
-              <div
-                className={`flex ${
-                  msg.type === "text" ? "items-center" : "items-end"
-                }`}
-              >
-                {clickedMessageId === msg.id && ( // Conditionally render based on clicked message ID
-                  <p className="text-sm text-gray-400">
-                    {msg.username} - {msg.timestamp}
-                  </p>
-                )}
-              </div>
+             
             </div>
           </div>
         ))}
