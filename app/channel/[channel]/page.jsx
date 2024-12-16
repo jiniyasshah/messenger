@@ -202,13 +202,16 @@ export default function ChatBox() {
                   ) : (
                     msg.content
                   )}
-                  {msg.status === "sent" ? (
-                    <IoMdCheckmarkCircle />
-                  ) : msg.status === "sending" ? (
-                    <MdOutlineRadioButtonUnchecked />
-                  ) : (
-                    <RxCrossCircled />
-                  )}
+                  {msg.username === username && (
+  msg.status === "sent" ? (
+    <IoMdCheckmarkCircle  />
+  ) : msg.status === "sending" ? (
+    <MdOutlineRadioButtonUnchecked  />
+  ) : (
+    <RxCrossCircled  />
+  )
+)}
+
                 </p>
               )}
               {msg.type === "image" && (
@@ -221,13 +224,16 @@ export default function ChatBox() {
                   />
                   <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute bottom-1 right-1 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
                     {msg.timestamp}{" "}
-                    {msg.status === "sent" ? (
-                      <IoMdCheckmarkCircle size="1.15em" />
-                    ) : msg.status === "sending" ? (
-                      <MdOutlineRadioButtonUnchecked size="1.15em" />
-                    ) : (
-                      <RxCrossCircled size="1.15em" />
-                    )}
+                   {msg.username === username && (
+  msg.status === "sent" ? (
+    <IoMdCheckmarkCircle size="1.15em" />
+  ) : msg.status === "sending" ? (
+    <MdOutlineRadioButtonUnchecked size="1.15em" />
+  ) : (
+    <RxCrossCircled size="1.15em" />
+  )
+)}
+
                   </div>
                 </div>
               )}
@@ -240,13 +246,16 @@ export default function ChatBox() {
                   ></video>
                   <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 right-2 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
                     {msg.timestamp}{" "}
-                    {msg.status === "sent" ? (
-                      <IoMdCheckmarkCircle size="1.15em" />
-                    ) : msg.status === "sending" ? (
-                      <MdOutlineRadioButtonUnchecked size="1.15em" />
-                    ) : (
-                      <RxCrossCircled size="1.15em" />
-                    )}
+                    {msg.username === username && (
+  msg.status === "sent" ? (
+    <IoMdCheckmarkCircle size="1.15em" />
+  ) : msg.status === "sending" ? (
+    <MdOutlineRadioButtonUnchecked size="1.15em" />
+  ) : (
+    <RxCrossCircled size="1.15em" />
+  )
+)}
+
                   </div>
                 </div>
               )}
