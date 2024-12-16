@@ -1,7 +1,7 @@
 import "./globals.css"; // Import the global CSS file for Tailwind classes and custom styles
 
 export const metadata = {
-  title: "Real-Time Messenger",
+  title: "Alihs",
   description:
     "A real-time messenger app with beautiful dark UI and responsive design.",
 };
