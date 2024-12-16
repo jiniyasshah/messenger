@@ -102,7 +102,7 @@ export default function ChatBox() {
     };
 
     setMessages((prev) => [...prev, newMessage]);
-
+    setInput("");
     try {
       await axios.post("/api/messages", { channel, message: newMessage });
       setMessages((prev) =>
@@ -118,54 +118,57 @@ export default function ChatBox() {
       );
       console.error("Error sending message:", error);
     }
-
-    setInput("");
   };
 
   const sendFile = async (file) => {
     if (!file) return;
 
+    // Create a new message with "sending" status
     const newMessage = {
-      id: uuidv4(), // Generate a unique ID for each message
+      id: uuidv4(),
       username,
-      content: URL.createObjectURL(file), // Show the file immediately
+      content: URL.createObjectURL(file), // Show file preview immediately
       type: file.type.startsWith("video") ? "video" : "image",
       timestamp: new Date().toLocaleTimeString(),
-      status: "sending", // Initial status
+      status: "sending",
     };
 
     setMessages((prev) => [...prev, newMessage]);
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append(
-      "upload_preset",
-      process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME
-    );
+    formData.append("image", file);
 
     try {
-      const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-        formData
-      );
+      // Upload the image via API
+      const response = await axios.post("/api/upload", formData);
 
-      const uploadedMessage = {
-        ...newMessage,
-        content: response.data.secure_url, // Update with the uploaded URL
-        status: "sent",
-      };
+      if (response.data.success) {
+        const uploadedMessage = {
+          ...newMessage,
+          content: response.data.imageUrl, // Update with the uploaded URL
+          status: "sent", // Update status to "sent"
+        };
 
-      await axios.post("/api/messages", { channel, message: uploadedMessage });
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === newMessage.id ? uploadedMessage : msg))
-      );
+        // Update the message in the state
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === newMessage.id ? uploadedMessage : msg))
+        );
+
+        // Optionally send the message to the server/channel
+        await axios.post("/api/messages", {
+          channel,
+          message: uploadedMessage,
+        });
+      } else {
+        throw new Error(response.data.error);
+      }
     } catch (error) {
+      console.error("File upload failed:", error.message);
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === newMessage.id ? { ...msg, status: "failed" } : msg
         )
       );
-      console.error("Error sending file:", error);
     }
   };
 
@@ -190,7 +193,7 @@ export default function ChatBox() {
           >
             <div className="flex flex-col items-end  ">
               {msg.type === "text" && (
-             <div>
+                <div>
                   <p className="flex flex-row items-center justify-between gap-x-2 bg-gray-700 p-2 rounded-lg max-w-xs">
                     {msg.content.includes("http") ? (
                       <Link
@@ -229,16 +232,14 @@ export default function ChatBox() {
                   />
                   <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute bottom-1 right-1 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
                     {msg.timestamp}{" "}
-                   {msg.username === username && (
-  msg.status === "sent" ? (
-    <IoMdCheckmarkCircle size="1.15em" />
-  ) : msg.status === "sending" ? (
-    <MdOutlineRadioButtonUnchecked size="1.15em" />
-  ) : (
-    <RxCrossCircled size="1.15em" />
-  )
-)}
-
+                    {msg.username === username &&
+                      (msg.status === "sent" ? (
+                        <IoMdCheckmarkCircle size="1.15em" />
+                      ) : msg.status === "sending" ? (
+                        <MdOutlineRadioButtonUnchecked size="1.15em" />
+                      ) : (
+                        <RxCrossCircled size="1.15em" />
+                      ))}
                   </div>
                 </div>
               )}
@@ -251,20 +252,17 @@ export default function ChatBox() {
                   ></video>
                   <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 right-2 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
                     {msg.timestamp}{" "}
-                    {msg.username === username && (
-  msg.status === "sent" ? (
-    <IoMdCheckmarkCircle size="1.15em" />
-  ) : msg.status === "sending" ? (
-    <MdOutlineRadioButtonUnchecked size="1.15em" />
-  ) : (
-    <RxCrossCircled size="1.15em" />
-  )
-)}
-
+                    {msg.username === username &&
+                      (msg.status === "sent" ? (
+                        <IoMdCheckmarkCircle size="1.15em" />
+                      ) : msg.status === "sending" ? (
+                        <MdOutlineRadioButtonUnchecked size="1.15em" />
+                      ) : (
+                        <RxCrossCircled size="1.15em" />
+                      ))}
                   </div>
                 </div>
               )}
-             
             </div>
           </div>
         ))}
