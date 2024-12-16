@@ -193,28 +193,39 @@ export default function ChatBox() {
           >
             <div className="flex flex-col items-end  ">
               {msg.type === "text" && (
-                <div>
-                  <p className="flex flex-row items-center justify-between gap-x-2 bg-gray-700 p-2 rounded-lg max-w-xs">
+                <div
+                  className={`flex flex-col ${
+                    msg.username === username ? "items-end" : "items-start"
+                  }`}
+                >
+                  <div className="flex flex-row items-center  justify-between gap-x-2 bg-gray-700 p-2 rounded-lg max-w-xs">
                     {msg.content.includes("http") ? (
                       <Link
                         href={msg.content}
                         target="_blank"
-                        className="text-blue-400 underline"
+                        className="text-blue-400 underline  break-words"
                       >
                         {msg.content}
                       </Link>
                     ) : (
-                      msg.content
+                      <div className=" break-all"> {msg.content}</div>
                     )}
+
                     {msg.username === username &&
                       (msg.status === "sent" ? (
-                        <IoMdCheckmarkCircle />
+                        <div>
+                          <IoMdCheckmarkCircle />
+                        </div>
                       ) : msg.status === "sending" ? (
-                        <MdOutlineRadioButtonUnchecked />
+                        <div>
+                          <MdOutlineRadioButtonUnchecked />
+                        </div>
                       ) : (
-                        <RxCrossCircled />
+                        <div>
+                          <RxCrossCircled />
+                        </div>
                       ))}
-                  </p>
+                  </div>
                   {clickedMessageId === msg.id && ( // Conditionally render based on clicked message ID
                     <p className="text-sm text-gray-400">
                       {msg.username} - {msg.timestamp}
