@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 
-// Cloudinary configuration
+// Cloudinary config
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -10,47 +10,43 @@ cloudinary.config({
 });
 
 export const POST = async (req) => {
+  const data = await req.formData();
+  const image = await data.get("image");
+  const fileBuffer = await image.arrayBuffer();
+
+  var mime = image.type;
+  var encoding = "base64";
+  var base64Data = Buffer.from(fileBuffer).toString("base64");
+  var fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+
   try {
-    console.log("API Route Hit: Processing File Upload...");
+    const uploadToCloudinary = () => {
+      return new Promise((resolve, reject) => {
+        var result = cloudinary.uploader
+          .upload(fileUri, {
+            invalidate: true,
+          })
+          .then((result) => {
+            console.log(result);
+            resolve(result);
+          })
+          .catch((error) => {
+            console.log(error);
+            reject(error);
+          });
+      });
+    };
 
-    // Get file from request
-    const data = await req.formData();
-    const image = data.get("image");
+    const result = await uploadToCloudinary();
 
-    if (!image) {
-      console.error("No image file provided in the request.");
-      return NextResponse.json(
-        { error: "No image file provided" },
-        { status: 400 }
-      );
-    }
-    console.log("Image Received:", image.name, image.type);
+    let imageUrl = result.secure_url;
 
-    // Convert image to base64
-    const fileBuffer = await image.arrayBuffer();
-    console.log("File Buffer Length:", fileBuffer.byteLength);
-
-    const base64Data = Buffer.from(fileBuffer).toString("base64");
-    const fileUri = `data:${image.type};base64,${base64Data}`;
-    console.log("Base64 Data Created.");
-
-    // Upload to Cloudinary
-    console.log("Uploading to Cloudinary...");
-    const result = await cloudinary.uploader.upload(fileUri, {
-      invalidate: true,
-    });
-    console.log("Upload Successful:", result.secure_url);
-
-    // Return success response
     return NextResponse.json(
-      { success: true, imageUrl: result.secure_url },
+      { success: true, imageUrl: imageUrl },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error in File Upload Process:", error.message);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.log("server err", error);
+    return NextResponse.json({ err: "Internal Server Error" }, { status: 500 });
   }
 };
