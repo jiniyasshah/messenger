@@ -71,11 +71,19 @@ export const useSendMessage = (username, channel) => {
       if (!file) return;
 
       const filePreviewUrl = URL.createObjectURL(file);
+
+      // Determine file type
+      const fileType = file.type.startsWith("video")
+        ? "video"
+        : file.type.startsWith("image")
+        ? "image"
+        : "file"; // Generic file type for others
+
       const newMessage = {
         id: uuidv4(),
         username,
-        content: filePreviewUrl,
-        type: file.type.startsWith("video") ? "video" : "image",
+        content: filePreviewUrl, // Local preview for the file
+        type: fileType,
         timestamp: new Date().toLocaleTimeString(),
         status: "sending",
       };
@@ -83,29 +91,33 @@ export const useSendMessage = (username, channel) => {
       setMessages((prev) => [...prev, newMessage]);
 
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("file", file); // Use 'file' as the form data key
 
       try {
+        // Upload file to the server
         const { data } = await axios.post("/api/upload", formData);
+
         if (data.success) {
           const uploadedMessage = {
             ...newMessage,
-            content: data.imageUrl, // Replace preview with uploaded URL
+            content: data.fileUrl, // Replace preview with actual file URL
             status: "sent",
           };
 
+          // Update message locally with uploaded file URL
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === newMessage.id ? uploadedMessage : msg
             )
           );
 
+          // Send final message to the backend
           await axios.post("/api/messages", {
             channel,
             message: uploadedMessage,
           });
         } else {
-          throw new Error(data.error || "Upload failed");
+          throw new Error(data.error || "File upload failed");
         }
       } catch (error) {
         setMessages((prev) =>
@@ -120,31 +132,6 @@ export const useSendMessage = (username, channel) => {
     },
     [channel, username]
   );
-
-  // Pusher setup for real-time messages
-  useEffect(() => {
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_APP_KEY, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-    });
-
-    const channelInstance = pusher.subscribe(channel);
-
-    const handleNewMessage = (data) => {
-      setMessages((prev) => {
-        if (!prev.some((msg) => msg.id === data.id)) {
-          return [...prev, { ...data, status: "sent" }];
-        }
-        return prev;
-      });
-    };
-
-    channelInstance.bind("new-message", handleNewMessage);
-
-    return () => {
-      channelInstance.unbind("new-message", handleNewMessage);
-      pusher.unsubscribe(channel);
-    };
-  }, [channel]);
 
   return {
     messages,

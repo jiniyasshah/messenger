@@ -12,6 +12,8 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
   // State to temporarily hold the selected/pasted file
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [previewVideo, setPreviewVideo] = useState(null);
+  const [previewFileIcon, setPreviewFileIcon] = useState(null);
 
   // Detect device type
   useEffect(() => {
@@ -57,12 +59,18 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageURL = URL.createObjectURL(file);
+      if (file.type.startsWith("image/")) {
+        const imageURL = URL.createObjectURL(file);
+        setPreviewImage(imageURL); // Set image preview
+      } else if (file.type.startsWith("video/")) {
+        const videoURL = URL.createObjectURL(file);
+        setPreviewVideo(videoURL); // Set video preview
+      } else {
+        setPreviewFileIcon(true); // Set file icon preview
+      }
       setSelectedFile(file); // Store the file temporarily
-      setPreviewImage(imageURL); // Set image preview
     }
   };
-
   // Handle submit button or Enter key
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -70,8 +78,10 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
     // Send the selected file if it exists
     if (selectedFile) {
       sendFile(selectedFile);
-      setSelectedFile(null); // Clear the file
-      setPreviewImage(null); // Clear preview
+      setSelectedFile(null);
+      setPreviewImage(null);
+      setPreviewVideo(null);
+      setPreviewFileIcon(null);
     }
 
     // Send the message text if it exists
@@ -112,6 +122,43 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
             </button>
           </div>
         )}
+        {previewVideo && (
+          <div className="relative mb-2 self-start">
+            <video
+              src={previewVideo}
+              className="w-20 h-20 rounded-md object-cover border border-gray-500"
+              // This makes the first frame of the video appear as a thumbnail
+              controls={false} // Remove controls
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedFile(null);
+                setPreviewVideo(null);
+              }}
+              className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 hover:bg-red-500"
+            >
+              <RxCross2 />
+            </button>
+          </div>
+        )}
+        {previewFileIcon && (
+          <div className="relative mb-2 self-start">
+            <div className="w-20 h-20 rounded-md border border-gray-500 flex items-center justify-center bg-gray-700">
+              <MdPhotoSizeSelectActual size="2em" />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedFile(null);
+                setPreviewFileIcon(null);
+              }}
+              className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 hover:bg-red-500"
+            >
+              <RxCross2 />
+            </button>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           {/* File Upload Button */}
           <div
@@ -125,7 +172,7 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
             type="file"
             ref={fileInputRef}
             className="hidden"
-            accept="image/*"
+            accept="*/*"
             onChange={handleFileUpload}
           />
           {/* Textarea Input */}

@@ -11,27 +11,35 @@ cloudinary.config({
 
 export const POST = async (req) => {
   const data = await req.formData();
-  const image = await data.get("image");
-  const fileBuffer = await image.arrayBuffer();
+  const file = await data.get("file"); // Expect "file" for both images/videos
+  const fileBuffer = await file.arrayBuffer();
 
-  var mime = image.type;
-  var encoding = "base64";
-  var base64Data = Buffer.from(fileBuffer).toString("base64");
-  var fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+  const mime = file.type; // Get MIME type (image/jpeg, video/mp4, etc.)
+  const encoding = "base64";
+  const base64Data = Buffer.from(fileBuffer).toString("base64");
+  const fileUri = `data:${mime};${encoding},${base64Data}`; // Construct data URI
 
   try {
+    // Dynamically set resource type for images and videos
+    const resourceType = mime.startsWith("image/")
+      ? "image"
+      : mime.startsWith("video/")
+      ? "video"
+      : "raw"; // Default to "raw" for other file types
+
     const uploadToCloudinary = () => {
       return new Promise((resolve, reject) => {
-        var result = cloudinary.uploader
+        cloudinary.uploader
           .upload(fileUri, {
             invalidate: true,
+            resource_type: resourceType, // Set resource type dynamically
           })
           .then((result) => {
             console.log(result);
             resolve(result);
           })
           .catch((error) => {
-            console.log(error);
+            console.error("Upload Error:", error);
             reject(error);
           });
       });
@@ -39,14 +47,17 @@ export const POST = async (req) => {
 
     const result = await uploadToCloudinary();
 
-    let imageUrl = result.secure_url;
+    const fileUrl = result.secure_url;
 
     return NextResponse.json(
-      { success: true, imageUrl: imageUrl },
+      { success: true, fileUrl: fileUrl, resourceType: resourceType },
       { status: 200 }
     );
   } catch (error) {
-    console.log("server err", error);
-    return NextResponse.json({ err: "Internal Server Error" }, { status: 500 });
+    console.error("Server Error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 };

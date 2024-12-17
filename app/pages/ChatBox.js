@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -7,10 +5,11 @@ import { IoMdCheckmarkCircle } from "react-icons/io";
 import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
 import { MdPhotoSizeSelectActual } from "react-icons/md";
-import { AiOutlineClose } from "react-icons/ai";
+import { RxCross2 } from "react-icons/rx";
 import { MdSend } from "react-icons/md";
 import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
+import ReactPlayer from "react-player";
 export default function ChatBox() {
   const params = useParams();
   const channel = params.channel;
@@ -18,21 +17,21 @@ export default function ChatBox() {
   const [username, setUsername] = useState("");
   const [clickedMessageId, setClickedMessageId] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null); // State for selected video
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
 
   const chatEndRef = useRef(null);
   const { messages, fetchMessages, input, setInput, sendMessage, sendFile } =
     useSendMessage(username, channel);
-  // Fetch messages after username is set
 
   useEffect(() => {
     const storedName = localStorage.getItem("username");
     if (storedName) {
       setUsername(storedName);
-      fetchMessages(); // Fetch messages only if username exists
+      fetchMessages();
     } else {
-      setShowUsernamePrompt(true); // Show prompt if no username is set
+      setShowUsernamePrompt(true);
     }
   }, [channel]);
 
@@ -40,21 +39,33 @@ export default function ChatBox() {
     if (tempUsername.trim()) {
       localStorage.setItem("username", tempUsername);
       setUsername(tempUsername);
-      setShowUsernamePrompt(false); // Hide prompt
-      fetchMessages(); // Fetch older messages
+      setShowUsernamePrompt(false);
+      fetchMessages();
     }
   };
-  const [imageLoaded, setImageLoaded] = useState(true);
-  const handleImageLoad = () => {
-    setImageLoaded(true); // Mark image as loaded
+  const [currentVideo, setCurrentVideo] = useState(null);
+
+  const handleVideoPlay = (videoRef, videoSrc) => {
+    // Pause other videos
+    if (currentVideo && currentVideo !== videoRef) {
+      currentVideo.pause();
+    }
+
+    // Update the current video
+    setCurrentVideo(videoRef);
   };
 
+  const [imageLoaded, setImageLoaded] = useState(true);
+  const handleImageLoad = () => setImageLoaded(true);
+
+  const [videoLoaded, setVideoLoaded] = useState(true);
+  const handleVideoLoad = () => setVideoLoaded(true);
+
   useEffect(() => {
-    // Scroll to the bottom only after the image has loaded or if no image is present
     if (imageLoaded || !messages.some((msg) => msg.type === "image")) {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, imageLoaded]); // Include imageLoaded in dependency array
+  }, [messages, imageLoaded, videoLoaded]);
 
   return (
     <div className="flex flex-col h-screen bg-black text-white relative">
@@ -156,16 +167,16 @@ export default function ChatBox() {
                 </div>
               )}
               {msg.type === "image" && (
-                <div className="relative">
+                <div className="relative rounded-lg max-w-[12rem] max-h-[20rem] overflow-hidden cursor-pointer">
                   <img
                     src={msg.content}
                     alt="Uploaded Image"
-                    className="rounded-lg max-w-[18rem] cursor-pointer"
+                    className="w-full h-full object-cover"
                     onClick={() => setSelectedImage(msg.content)} // Set selected image for modal
                     onLoad={handleImageLoad}
                   />
                   <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute bottom-1 right-1 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
-                    {msg.timestamp}{" "}
+                    {msg.timestamp}
                     {msg.username === username &&
                       (msg.status === "sent" ? (
                         <IoMdCheckmarkCircle size="1.15em" />
@@ -178,14 +189,18 @@ export default function ChatBox() {
                 </div>
               )}
               {msg.type === "video" && (
-                <div className="relative">
+                <div className=" relative rounded-lg max-w-[12rem] max-h-[25rem] overflow-hidden cursor-pointer">
                   <video
                     controls
                     src={msg.content}
-                    className="rounded-lg max-w-xs"
-                  ></video>
+                    className="w-full min-h-[20rem]"
+                    onClick={() => setSelectedVideo(msg.content)}
+                    onLoadedData={handleVideoLoad}
+                    onPlay={(e) => handleVideoPlay(e.target, msg.content)}
+                  />
+
                   <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 right-2 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
-                    {msg.timestamp}{" "}
+                    {msg.timestamp}
                     {msg.username === username &&
                       (msg.status === "sent" ? (
                         <IoMdCheckmarkCircle size="1.15em" />
@@ -221,10 +236,11 @@ export default function ChatBox() {
               className="max-h-[90vh] max-w-[90vw]"
             />
             <button
-              className="absolute top-2 right-2 text-white text-2xl"
+              className="absolute top-1 right-1 text-white  rounded-lg
+              bg-gray-800 px-3 py-2 opacity-90 text-xs"
               onClick={() => setSelectedImage(null)}
             >
-              <AiOutlineClose />
+              Back
             </button>
           </div>
         </div>
