@@ -54,7 +54,7 @@ export default function ChatBox() {
     if (imageLoaded || !messages.some((msg) => msg.type === "image")) {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, input, imageLoaded]); // Include imageLoaded in dependency array
+  }, [messages, imageLoaded]); // Include imageLoaded in dependency array
 
   return (
     <div className="flex flex-col h-screen bg-black text-white relative">
