@@ -159,15 +159,10 @@ export default function ChatBox() {
                         </div>
                       ))}
                   </div>
-                  {clickedMessageId === msg.id && ( // Conditionally render based on clicked message ID
-                    <p className="text-sm text-gray-400">
-                      {msg.username} - {msg.timestamp}
-                    </p>
-                  )}
                 </div>
               )}
               {msg.type === "image" && (
-                <div className="relative rounded-lg max-w-[12rem] max-h-[20rem] overflow-hidden cursor-pointer">
+                <div className="relative rounded-lg max-w-[12rem]  overflow-hidden cursor-pointer">
                   <img
                     src={msg.content}
                     alt="Uploaded Image"
@@ -175,17 +170,50 @@ export default function ChatBox() {
                     onClick={() => setSelectedImage(msg.content)} // Set selected image for modal
                     onLoad={handleImageLoad}
                   />
-                  <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute bottom-1 right-1 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
-                    {msg.timestamp}
-                    {msg.username === username &&
-                      (msg.status === "sent" ? (
-                        <IoMdCheckmarkCircle size="1.15em" />
-                      ) : msg.status === "sending" ? (
-                        <MdOutlineRadioButtonUnchecked size="1.15em" />
+                  {!msg.imageCaption && (
+                    <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute bottom-1 right-1 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
+                      {msg.timestamp}
+                      {msg.username === username &&
+                        (msg.status === "sent" ? (
+                          <IoMdCheckmarkCircle size="1.15em" />
+                        ) : msg.status === "sending" ? (
+                          <MdOutlineRadioButtonUnchecked size="1.15em" />
+                        ) : (
+                          <RxCrossCircled size="1.15em" />
+                        ))}
+                    </div>
+                  )}
+                  {msg.imageCaption && (
+                    <div className="flex w-full  flex-row text-sm items-center justify-between gap-x-2 bg-gray-700 p-2 ">
+                      {msg.imageCaption.includes("http") ? (
+                        <Link
+                          href={msg.imageCaption}
+                          target="_blank"
+                          className="text-blue-400 underline  break-words"
+                        >
+                          {msg.imageCaption}
+                        </Link>
                       ) : (
-                        <RxCrossCircled size="1.15em" />
-                      ))}
-                  </div>
+                        <div className="whitespace-pre-wrap break-words w-full">
+                          {msg.imageCaption}
+                        </div>
+                      )}
+                      {msg.username === username &&
+                        (msg.status === "sent" ? (
+                          <div>
+                            <IoMdCheckmarkCircle />
+                          </div>
+                        ) : msg.status === "sending" ? (
+                          <div>
+                            <MdOutlineRadioButtonUnchecked />
+                          </div>
+                        ) : (
+                          <div>
+                            <RxCrossCircled />
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               )}
               {msg.type === "video" && (
@@ -199,18 +227,57 @@ export default function ChatBox() {
                     onPlay={(e) => handleVideoPlay(e.target, msg.content)}
                   />
 
-                  <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 right-2 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
-                    {msg.timestamp}
-                    {msg.username === username &&
-                      (msg.status === "sent" ? (
-                        <IoMdCheckmarkCircle size="1.15em" />
-                      ) : msg.status === "sending" ? (
-                        <MdOutlineRadioButtonUnchecked size="1.15em" />
+                  {!msg.imageCaption && (
+                    <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 right-2 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
+                      {msg.timestamp}
+                      {msg.username === username &&
+                        (msg.status === "sent" ? (
+                          <IoMdCheckmarkCircle size="1.15em" />
+                        ) : msg.status === "sending" ? (
+                          <MdOutlineRadioButtonUnchecked size="1.15em" />
+                        ) : (
+                          <RxCrossCircled size="1.15em" />
+                        ))}
+                    </div>
+                  )}
+
+                  {msg.imageCaption && (
+                    <div className="flex w-full  flex-row text-sm items-center justify-between gap-x-2 bg-gray-700 p-2 ">
+                      {msg.imageCaption.includes("http") ? (
+                        <Link
+                          href={msg.imageCaption}
+                          target="_blank"
+                          className="text-blue-400 underline  break-words"
+                        >
+                          {msg.imageCaption}
+                        </Link>
                       ) : (
-                        <RxCrossCircled size="1.15em" />
-                      ))}
-                  </div>
+                        <div className="whitespace-pre-wrap break-words w-full">
+                          {msg.imageCaption}
+                        </div>
+                      )}
+                      {msg.username === username &&
+                        (msg.status === "sent" ? (
+                          <div>
+                            <IoMdCheckmarkCircle />
+                          </div>
+                        ) : msg.status === "sending" ? (
+                          <div>
+                            <MdOutlineRadioButtonUnchecked />
+                          </div>
+                        ) : (
+                          <div>
+                            <RxCrossCircled />
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
+              )}
+              {clickedMessageId === msg.id && ( // Conditionally render based on clicked message ID
+                <p className="text-sm text-gray-400">
+                  {msg.username} - {msg.timestamp}
+                </p>
               )}
             </div>
           </div>

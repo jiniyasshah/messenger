@@ -75,19 +75,23 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Send the selected file if it exists
-    if (selectedFile) {
-      sendFile(selectedFile);
+    const hasFile = selectedFile !== null;
+    const hasText = input.trim() !== "";
+
+    if (hasFile) {
+      sendFile(selectedFile, hasText ? input : null); // Send file with text only if text exists
       setSelectedFile(null);
       setPreviewImage(null);
       setPreviewVideo(null);
       setPreviewFileIcon(null);
     }
 
-    // Send the message text if it exists
-    if (input.trim() !== "") {
-      sendMessage(e);
+    if (hasText && !hasFile) {
+      sendMessage(e); // Send message only if no file was sent
     }
+
+    // Clear the input field after sending the message
+    setInput("");
   };
 
   // Handle Enter key press

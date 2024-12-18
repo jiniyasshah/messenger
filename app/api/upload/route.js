@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
 import { NextResponse } from "next/server";
 
 // Cloudinary config
@@ -20,31 +21,39 @@ export const POST = async (req) => {
 
     const fileBuffer = await file.arrayBuffer();
     const mime = file.type; // MIME type (image/jpeg, video/mp4, etc.)
+
+    // Determine resource type based on MIME type
     const resourceType = mime.startsWith("image/")
       ? "image"
       : mime.startsWith("video/")
       ? "video"
       : "raw"; // Default to "raw" for unsupported types
 
-    const MAX_CHUNK_SIZE = 3 * 1024 * 1024; // 4MB
-
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_large(
-        `data:${mime};base64,${Buffer.from(fileBuffer).toString("base64")}`,
-        {
-          resource_type: resourceType,
-          chunk_size: MAX_CHUNK_SIZE,
-        },
-        (error, result) => {
-          if (error) {
-            console.error("Upload Error:", error);
-            reject(error);
-          } else {
-            resolve(result);
+    const uploadToCloudinary = () => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "auto", // Dynamically determine resource type
+            invalidate: true,
+          },
+          (error, result) => {
+            if (error) {
+              console.error("Upload Error:", error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
           }
-        }
-      );
-    });
+        );
+
+        // Stream the file to Cloudinary using streamifier
+        streamifier
+          .createReadStream(Buffer.from(fileBuffer))
+          .pipe(uploadStream);
+      });
+    };
+
+    const result = await uploadToCloudinary();
 
     return NextResponse.json(
       { success: true, fileUrl: result.secure_url, resourceType: resourceType },

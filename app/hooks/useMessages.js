@@ -67,7 +67,7 @@ export const useSendMessage = (username, channel) => {
 
   // Send a file
   const sendFile = useCallback(
-    async (file) => {
+    async (file, imageCaption) => {
       if (!file) return;
 
       const filePreviewUrl = URL.createObjectURL(file);
@@ -85,6 +85,7 @@ export const useSendMessage = (username, channel) => {
         content: filePreviewUrl, // Local preview for the file
         type: fileType,
         timestamp: new Date().toLocaleTimeString(),
+        imageCaption: imageCaption || "",
         status: "sending",
       };
 
