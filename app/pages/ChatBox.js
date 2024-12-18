@@ -6,7 +6,7 @@ import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
 import { MdPhotoSizeSelectActual } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
-import { MdSend } from "react-icons/md";
+import { MdArrowBack } from "react-icons/md";
 import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
 import ReactPlayer from "react-player";
@@ -236,11 +236,11 @@ export default function ChatBox() {
               className="max-h-[90vh] max-w-[90vw]"
             />
             <button
-              className="absolute top-1 right-1 text-white  rounded-lg
-              bg-gray-800 px-3 py-2 opacity-90 text-xs"
+              className="absolute top-1 left-1   rounded-lg
+              bg-gray-800 bg-opacity-70 text-sm px-3 py-2 flex flex-row gap-2 items-center "
               onClick={() => setSelectedImage(null)}
             >
-              Back
+              <MdArrowBack /> Back
             </button>
           </div>
         </div>

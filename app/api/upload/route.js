@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
 import { NextResponse } from "next/server";
 
 // Cloudinary config
@@ -10,47 +11,52 @@ cloudinary.config({
 });
 
 export const POST = async (req) => {
-  const data = await req.formData();
-  const file = await data.get("file"); // Expect "file" for both images/videos
-  const fileBuffer = await file.arrayBuffer();
-
-  const mime = file.type; // Get MIME type (image/jpeg, video/mp4, etc.)
-  const encoding = "base64";
-  const base64Data = Buffer.from(fileBuffer).toString("base64");
-  const fileUri = `data:${mime};${encoding},${base64Data}`; // Construct data URI
-
   try {
-    // Dynamically set resource type for images and videos
+    const data = await req.formData();
+    const file = await data.get("file"); // Expect "file" field for the uploaded file
+
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const fileBuffer = await file.arrayBuffer();
+    const mime = file.type; // MIME type (image/jpeg, video/mp4, etc.)
+
+    // Determine resource type based on MIME type
     const resourceType = mime.startsWith("image/")
       ? "image"
       : mime.startsWith("video/")
       ? "video"
-      : "raw"; // Default to "raw" for other file types
+      : "raw"; // Default to "raw" for unsupported types
 
     const uploadToCloudinary = () => {
       return new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload(fileUri, {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "auto", // Dynamically determine resource type
             invalidate: true,
-            resource_type: resourceType, // Set resource type dynamically
-          })
-          .then((result) => {
-            console.log(result);
-            resolve(result);
-          })
-          .catch((error) => {
-            console.error("Upload Error:", error);
-            reject(error);
-          });
+          },
+          (error, result) => {
+            if (error) {
+              console.error("Upload Error:", error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+
+        // Stream the file to Cloudinary using streamifier
+        streamifier
+          .createReadStream(Buffer.from(fileBuffer))
+          .pipe(uploadStream);
       });
     };
 
     const result = await uploadToCloudinary();
 
-    const fileUrl = result.secure_url;
-
     return NextResponse.json(
-      { success: true, fileUrl: fileUrl, resourceType: resourceType },
+      { success: true, fileUrl: result.secure_url, resourceType: resourceType },
       { status: 200 }
     );
   } catch (error) {
