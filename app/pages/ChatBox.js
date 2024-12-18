@@ -4,13 +4,11 @@ import Link from "next/link";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
-import { MdPhotoSizeSelectActual } from "react-icons/md";
-import { RxCross2 } from "react-icons/rx";
+
 import { MdArrowBack } from "react-icons/md";
 import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
-import { MdOutlineEmojiEmotions } from "react-icons/md";
-import ReactPlayer from "react-player";
+
 export default function ChatBox() {
   const params = useParams();
   const channel = params.channel;
@@ -243,17 +241,17 @@ export default function ChatBox() {
                         ))}
                     </div>
                   </div>
-                  {msg.reactions &&
-                    Object.entries(msg.reactions).map(
-                      ([user, emoji], index) => (
-                        <div
-                          key={index}
-                          className={`self-end bg-gray-800 px-2 py-[0.2rem] rounded-lg bg-opacity-80 -translate-y-2 cursor-pointer text-xs hover:scale-110 transition-transform flex items-center`}
-                        >
-                          <span>{emoji}</span>
-                        </div>
-                      )
-                    )}
+                  {msg.reactions && (
+                    <div
+                      className={`self-end bg-gray-800 px-2 py-[0.2rem] rounded-lg bg-opacity-80 -translate-y-2 cursor-pointer text-xs hover:scale-110 transition-transform flex items-center`}
+                    >
+                      {Object.entries(msg.reactions).map(
+                        ([user, emoji], index) => (
+                          <span key={index}>{emoji}</span>
+                        )
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               {msg.type === "image" && (

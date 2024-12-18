@@ -101,34 +101,51 @@ export async function PATCH(request) {
 
     const messagesCollection = await connectToDB();
 
-    // Update the reactions in the database
-    const updateResult = await messagesCollection.updateOne(
-      { id: messageId },
-      {
-        $set: {
-          [`reactions.${username}`]: emoji, // Ensure one emoji per user
-        },
-      }
-    );
+    // Retrieve the current message
+    const currentMessage = await messagesCollection.findOne({ id: messageId });
 
-    if (!updateResult.matchedCount) {
+    if (!currentMessage) {
       return NextResponse.json(
         { error: "Message not found." },
         { status: 404 }
       );
     }
 
-    const updatedMessage = await messagesCollection.findOne({ id: messageId });
+    const currentReactions = currentMessage.reactions || {};
+
+    // Determine whether to add or remove the reaction
+    if (currentReactions[username] === emoji) {
+      // Remove the reaction if it already exists
+      delete currentReactions[username];
+    } else {
+      // Add/update the reaction
+      currentReactions[username] = emoji;
+    }
+
+    // Update the reactions in the database
+    const updateResult = await messagesCollection.updateOne(
+      { id: messageId },
+      {
+        $set: { reactions: currentReactions },
+      }
+    );
+
+    if (!updateResult.matchedCount) {
+      return NextResponse.json(
+        { error: "Failed to update reactions." },
+        { status: 500 }
+      );
+    }
 
     // Notify others via Pusher
     await pusher.trigger("reactions", "updated", {
       messageId,
-      reactions: updatedMessage.reactions,
+      reactions: currentReactions,
     });
 
     return NextResponse.json({
       success: true,
-      reactions: updatedMessage.reactions,
+      reactions: currentReactions,
     });
   } catch (error) {
     console.error("Error updating reactions:", error);

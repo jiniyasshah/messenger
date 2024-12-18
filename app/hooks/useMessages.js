@@ -33,8 +33,11 @@ export const useSendMessage = (username, channel) => {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
     });
 
-    const channelInstance = pusher.subscribe(channel);
-    channelInstance.bind("new-message", (data) => {
+    // Subscribe to the main channel
+    const messageChannel = pusher.subscribe(channel);
+
+    // Bind to the new-message event
+    messageChannel.bind("new-message", (data) => {
       setMessages((prev) => {
         if (!prev.some((msg) => msg.id === data.id)) {
           return [...prev, data];
@@ -43,8 +46,21 @@ export const useSendMessage = (username, channel) => {
       });
     });
 
+    // Subscribe to the reactions channel
+    const reactionsChannel = pusher.subscribe("reactions");
+
+    // Bind to the updated event
+    reactionsChannel.bind("updated", (data) => {
+      const { messageId, reactions } = data;
+
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? { ...msg, reactions } : msg))
+      );
+    });
+
     return () => {
       pusher.unsubscribe(channel);
+      pusher.unsubscribe("reactions");
     };
   }, [channel]);
 
@@ -162,12 +178,33 @@ export const useSendMessage = (username, channel) => {
   );
 
   const addReaction = async (messageId, emoji) => {
+    // Optimistically update the UI
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === messageId) {
+          const updatedReactions = { ...msg.reactions };
+          if (updatedReactions[username] === emoji) {
+            // If the same emoji exists, remove it
+            delete updatedReactions[username];
+          } else {
+            // Otherwise, add/update the reaction
+            updatedReactions[username] = emoji;
+          }
+          return { ...msg, reactions: updatedReactions };
+        }
+        return msg;
+      })
+    );
+
     try {
+      // Send the API request
       const { data } = await axios.patch("/api/messages", {
         messageId,
-        emoji,
+        emoji: emoji, // Send the emoji to add or remove
         username, // Ensure this is passed
       });
+
+      // Update state with confirmed reactions from the server
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId ? { ...msg, reactions: data.reactions } : msg
@@ -175,6 +212,24 @@ export const useSendMessage = (username, channel) => {
       );
     } catch (error) {
       console.error("Error in addReaction:", error.message || error);
+
+      // Revert the optimistic update if the API call fails
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.id === messageId) {
+            const updatedReactions = { ...msg.reactions };
+            if (updatedReactions[username] === emoji) {
+              // Re-add the removed reaction on failure
+              updatedReactions[username] = emoji;
+            } else {
+              // Remove the optimistic reaction if it was added
+              delete updatedReactions[username];
+            }
+            return { ...msg, reactions: updatedReactions };
+          }
+          return msg;
+        })
+      );
     }
   };
 
