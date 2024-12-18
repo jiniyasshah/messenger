@@ -168,7 +168,7 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
           <div
             type="button"
             onClick={() => fileInputRef.current.click()}
-            className="bg-transparent rounded-lg hover:text-blue-500 cursor-pointer"
+            className="bg-transparent rounded-lg text-blue-400 hover:text-blue-500 cursor-pointer"
           >
             <MdPhotoSizeSelectActual size="2em" />
           </div>
@@ -180,20 +180,37 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
             onChange={handleFileUpload}
           />
           {/* Textarea Input */}
-          <textarea
-            ref={textAreaRef}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={isMobile ? null : handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Type a message..."
-            rows={1}
-            className="flex-1 w-full p-2 rounded-lg bg-gray-700 text-white focus:outline-none resize-none"
-            style={{
-              maxHeight: "calc(5 * 1.5em)",
-              overflowY: input.split("\n").length > 4 ? "auto" : "hidden",
-            }}
-          />
+          {!previewImage ? (
+            <textarea
+              ref={textAreaRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={isMobile ? null : handleKeyDown}
+              onPaste={handlePaste}
+              placeholder="Type a message..."
+              rows={1}
+              className="flex-1 w-full p-2 rounded-lg bg-gray-700 text-white focus:outline-none resize-none"
+              style={{
+                maxHeight: "calc(5 * 1.5em)",
+                overflowY: input.split("\n").length > 4 ? "auto" : "hidden",
+              }}
+            />
+          ) : (
+            <textarea
+              ref={textAreaRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={isMobile ? null : handleKeyDown}
+              onPaste={handlePaste}
+              placeholder="Add a caption..."
+              rows={1}
+              className="flex-1 w-full p-2 rounded-lg bg-gray-700 text-white focus:outline-none resize-none"
+              style={{
+                maxHeight: "calc(5 * 1.5em)",
+                overflowY: input.split("\n").length > 4 ? "auto" : "hidden",
+              }}
+            />
+          )}
           {/* Send Button */}
           <button type="submit" className="text-blue-400 hover:text-blue-500">
             <MdSend size="1.7em" />

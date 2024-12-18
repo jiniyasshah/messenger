@@ -39,8 +39,12 @@ export const useSendMessage = (username, channel) => {
         username,
         content: input,
         type: "text",
-        timestamp: new Date().toLocaleTimeString(),
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
         status: "sending",
+        reactions: {}, // Add reactions object
       };
 
       setMessages((prev) => [...prev, newMessage]);
@@ -84,7 +88,10 @@ export const useSendMessage = (username, channel) => {
         username,
         content: filePreviewUrl, // Local preview for the file
         type: fileType,
-        timestamp: new Date().toLocaleTimeString(),
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
         imageCaption: imageCaption || "",
         status: "sending",
       };
@@ -134,6 +141,62 @@ export const useSendMessage = (username, channel) => {
     [channel, username]
   );
 
+  const addReaction = async (messageId, emoji) => {
+    // Optimistically update the UI
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === messageId) {
+          const updatedReactions = { ...msg.reactions };
+          if (updatedReactions[username] === emoji) {
+            // If the same emoji exists, remove it
+            delete updatedReactions[username];
+          } else {
+            // Otherwise, add/update the reaction
+            updatedReactions[username] = emoji;
+          }
+          return { ...msg, reactions: updatedReactions };
+        }
+        return msg;
+      })
+    );
+
+    try {
+      // Send the API request
+      const { data } = await axios.patch("/api/messages", {
+        messageId,
+        emoji: emoji, // Send the emoji to add or remove
+        username, // Ensure this is passed
+      });
+
+      // Update state with confirmed reactions from the server
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, reactions: data.reactions } : msg
+        )
+      );
+    } catch (error) {
+      console.error("Error in addReaction:", error.message || error);
+
+      // Revert the optimistic update if the API call fails
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.id === messageId) {
+            const updatedReactions = { ...msg.reactions };
+            if (updatedReactions[username] === emoji) {
+              // Re-add the removed reaction on failure
+              updatedReactions[username] = emoji;
+            } else {
+              // Remove the optimistic reaction if it was added
+              delete updatedReactions[username];
+            }
+            return { ...msg, reactions: updatedReactions };
+          }
+          return msg;
+        })
+      );
+    }
+  };
+
   return {
     messages,
     setInput,
@@ -141,5 +204,6 @@ export const useSendMessage = (username, channel) => {
     sendMessage,
     sendFile,
     fetchMessages,
+    addReaction,
   };
 };

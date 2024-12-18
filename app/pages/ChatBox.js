@@ -9,6 +9,7 @@ import { RxCross2 } from "react-icons/rx";
 import { MdArrowBack } from "react-icons/md";
 import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
+import { MdOutlineEmojiEmotions } from "react-icons/md";
 import ReactPlayer from "react-player";
 export default function ChatBox() {
   const params = useParams();
@@ -22,8 +23,16 @@ export default function ChatBox() {
   const [tempUsername, setTempUsername] = useState("");
 
   const chatEndRef = useRef(null);
-  const { messages, fetchMessages, input, setInput, sendMessage, sendFile } =
-    useSendMessage(username, channel);
+
+  const {
+    messages,
+    fetchMessages,
+    input,
+    setInput,
+    sendMessage,
+    sendFile,
+    addReaction,
+  } = useSendMessage(username, channel);
 
   useEffect(() => {
     const storedName = localStorage.getItem("username");
@@ -34,6 +43,21 @@ export default function ChatBox() {
       setShowUsernamePrompt(true);
     }
   }, [channel]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      // Don't close if clicking on message or emoji
+      if (e.target.closest(".message") || e.target.closest(".emoji-panel")) {
+        return;
+      }
+      setClickedMessageId(null);
+    };
+
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Update message click handler
 
   const handleUsernameSubmit = () => {
     if (tempUsername.trim()) {
@@ -66,6 +90,24 @@ export default function ChatBox() {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, imageLoaded, videoLoaded]);
+
+  // Function to handle regular click on the message
+  const handleMessageContentClick = (e, msgId) => {
+    e.stopPropagation();
+    setClickedMessageId((prev) => (prev != msgId ? msgId : null));
+  };
+
+  const handleEmojiClick = async (messageId, emoji) => {
+    try {
+      // Call the addReaction method from your hook
+      setClickedMessageId(null);
+      await addReaction(messageId, emoji);
+    } catch (error) {
+      console.error("Error adding reaction:", error);
+    }
+  };
+
+  // Add handler for emoji clicks
 
   return (
     <div className="flex flex-col h-screen bg-black text-white relative">
@@ -111,25 +153,63 @@ export default function ChatBox() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-2 px-2 py-3">
+      <div className="flex-1 overflow-y-auto space-y-2 px-2 py-3 select-none">
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex flex-col message ${
+            className={`relative flex flex-col ${
               msg.username === username ? "items-end" : "items-start"
             }`}
-            onClick={() =>
-              setClickedMessageId((prev) => (prev === msg.id ? null : msg.id))
-            } // Toggle clicked message ID
           >
-            <div className="flex flex-col items-end  ">
+            {clickedMessageId === msg.id && (
+              <div
+                className={`flex flex-col self-center text-[1.7rem] text-gray-400 z-50 bg-transparent mb-4`}
+              >
+                <div className="flex  flex-row gap-x-[0.6rem] bg-[#23292f] rounded-lg p-2 emoji-panel">
+                  <div
+                    onClick={() => handleEmojiClick(msg.id, "❤️")}
+                    className="cursor-pointer hover:scale-110 transition-transform"
+                  >
+                    ❤️
+                  </div>
+                  <div
+                    onClick={() => handleEmojiClick(msg.id, "😆")}
+                    className="cursor-pointer hover:scale-110 transition-transform"
+                  >
+                    😆
+                  </div>
+                  <div
+                    onClick={() => handleEmojiClick(msg.id, "😮")}
+                    className="cursor-pointer hover:scale-110 transition-transform"
+                  >
+                    😮
+                  </div>
+                  <div
+                    onClick={() => handleEmojiClick(msg.id, "😢")}
+                    className="cursor-pointer hover:scale-110 transition-transform"
+                  >
+                    😢
+                  </div>
+                  <div
+                    onClick={() => handleEmojiClick(msg.id, "😡")}
+                    className="cursor-pointer hover:scale-110 transition-transform"
+                  >
+                    😡
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col items-end  relative">
               {msg.type === "text" && (
                 <div
                   className={`flex flex-col ${
                     msg.username === username ? "items-end" : "items-start"
                   }`}
                 >
-                  <div className="flex flex-row items-center  justify-between gap-x-2 bg-gray-700 p-2 rounded-lg max-w-xs">
+                  <div
+                    onMouseDown={(e) => handleMessageContentClick(e, msg.id)} // Regular click
+                    className="message flex flex-row items-center md:max-w-xs max-w-[15rem] justify-between gap-x-3 bg-gray-700 p-2 rounded-lg "
+                  >
                     {msg.content.includes("http") ? (
                       <Link
                         href={msg.content}
@@ -143,22 +223,37 @@ export default function ChatBox() {
                         {msg.content}
                       </div>
                     )}
-
-                    {msg.username === username &&
-                      (msg.status === "sent" ? (
-                        <div>
-                          <IoMdCheckmarkCircle />
-                        </div>
-                      ) : msg.status === "sending" ? (
-                        <div>
-                          <MdOutlineRadioButtonUnchecked />
-                        </div>
-                      ) : (
-                        <div>
-                          <RxCrossCircled />
-                        </div>
-                      ))}
+                    <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
+                      <div className="text-xs whitespace-nowrap">
+                        {msg.timestamp}
+                      </div>
+                      {msg.username === username &&
+                        (msg.status === "sent" ? (
+                          <div className="text-sm">
+                            <IoMdCheckmarkCircle />
+                          </div>
+                        ) : msg.status === "sending" ? (
+                          <div className="text-sm">
+                            <MdOutlineRadioButtonUnchecked />
+                          </div>
+                        ) : (
+                          <div className="text-sm">
+                            <RxCrossCircled />
+                          </div>
+                        ))}
+                    </div>
                   </div>
+                  {msg.reactions &&
+                    Object.entries(msg.reactions).map(
+                      ([user, emoji], index) => (
+                        <div
+                          key={index}
+                          className={`self-end bg-gray-800 px-2 py-[0.2rem] rounded-lg bg-opacity-80 -translate-y-2 cursor-pointer text-xs hover:scale-110 transition-transform flex items-center`}
+                        >
+                          <span>{emoji}</span>
+                        </div>
+                      )
+                    )}
                 </div>
               )}
               {msg.type === "image" && (
@@ -256,6 +351,7 @@ export default function ChatBox() {
                           {msg.imageCaption}
                         </div>
                       )}
+
                       {msg.username === username &&
                         (msg.status === "sent" ? (
                           <div>
@@ -273,11 +369,6 @@ export default function ChatBox() {
                     </div>
                   )}
                 </div>
-              )}
-              {clickedMessageId === msg.id && ( // Conditionally render based on clicked message ID
-                <p className="text-sm text-gray-400">
-                  {msg.username} - {msg.timestamp}
-                </p>
               )}
             </div>
           </div>
