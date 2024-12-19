@@ -34,9 +34,9 @@ const ReactionComponent = ({ username, msg }) => {
   return (
     <>
       {msg.reactions && Object.values(msg.reactions).length > 0 && (
-        <div className="flex flex-wrap space-y-1 gap-x-4 md:mt-2 mt-1 items-center justify-between md:max-w-xs max-w-[10rem]">
+        <div className=" flex flex-wrap space-y-1  md:mt-2 mt-1 items-center justify-between w-full ">
           <div
-            className={` cursor-pointer  hover:scale-110 transition-transform flex flex-wrap items-center gap-x-1`}
+            className={` cursor-pointer space-y-1 hover:scale-110 transition-transform flex flex-wrap items-center gap-x-1`}
           >
             {Object.entries(
               Object.values(msg.reactions).reduce((acc, emoji) => {

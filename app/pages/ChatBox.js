@@ -95,13 +95,10 @@ export default function ChatBox() {
     setClickedMessageId((prev) => (prev != msgId ? msgId : null));
   };
 
-  const [emojiData, setEmojiData] = useState({});
-
   const handleEmojiClick = async (messageId, emoji) => {
     try {
       setClickedMessageId(null);
       // Optimistically update the emojiData
-      setEmojiData((prev) => ({ ...prev, [messageId]: emoji }));
 
       // Call the addReaction method to persist the change
       await addReaction(messageId, emoji);
@@ -109,11 +106,6 @@ export default function ChatBox() {
       console.error("Error adding reaction:", error);
 
       // Revert the optimistic update if the API call fails
-      setEmojiData((prev) => {
-        const updatedData = { ...prev };
-        delete updatedData[messageId];
-        return updatedData;
-      });
     }
   };
 
@@ -200,7 +192,7 @@ export default function ChatBox() {
                   }`}
                   onMouseDown={(e) => handleMessageContentClick(e, msg.id)} // Regular click
                 >
-                  <div className=" flex flex-row items-center md:max-w-xs max-w-[15rem]  justify-between gap-x-3  rounded-xl ">
+                  <div className=" flex flex-wrap space-y-1 items-center md:max-w-xs max-w-[10rem]  justify-between gap-x-2  rounded-xl ">
                     {msg.content.includes("http") ? (
                       <Link
                         href={msg.content}
@@ -210,10 +202,11 @@ export default function ChatBox() {
                         {msg.content}
                       </Link>
                     ) : (
-                      <div className="whitespace-pre-wrap break-words md:max-w-[15rem] max-w-[10rem]">
+                      <div className="whitespace-pre-wrap break-words md:max-w-xs  max-w-[10rem]">
                         {msg.content}
                       </div>
                     )}
+                    <ReactionComponent msg={msg} username={username} />
                     {!Object.values(msg.reactions).length > 0 && (
                       <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
                         <div className="text-xs whitespace-nowrap">
@@ -236,8 +229,6 @@ export default function ChatBox() {
                       </div>
                     )}
                   </div>
-
-                  <ReactionComponent msg={msg} username={username} />
                 </div>
               )}
               {msg.type === "image" && (
