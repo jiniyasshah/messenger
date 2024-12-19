@@ -235,6 +235,7 @@ export const useSendMessage = (username, channel) => {
 
   return {
     messages,
+    setMessages,
     setInput,
     input,
     sendMessage,

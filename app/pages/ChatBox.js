@@ -4,7 +4,7 @@ import Link from "next/link";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
-
+import ReactionComponent from "../components/ReactionComponent";
 import { MdArrowBack } from "react-icons/md";
 import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
@@ -95,13 +95,25 @@ export default function ChatBox() {
     setClickedMessageId((prev) => (prev != msgId ? msgId : null));
   };
 
+  const [emojiData, setEmojiData] = useState({});
+
   const handleEmojiClick = async (messageId, emoji) => {
     try {
-      // Call the addReaction method from your hook
       setClickedMessageId(null);
+      // Optimistically update the emojiData
+      setEmojiData((prev) => ({ ...prev, [messageId]: emoji }));
+
+      // Call the addReaction method to persist the change
       await addReaction(messageId, emoji);
     } catch (error) {
       console.error("Error adding reaction:", error);
+
+      // Revert the optimistic update if the API call fails
+      setEmojiData((prev) => {
+        const updatedData = { ...prev };
+        delete updatedData[messageId];
+        return updatedData;
+      });
     }
   };
 
@@ -161,53 +173,34 @@ export default function ChatBox() {
           >
             {clickedMessageId === msg.id && (
               <div
-                className={`flex flex-col self-center text-[1.7rem] text-gray-400 z-50 bg-transparent mb-4`}
+                className={`flex flex-col self-center  text-gray-400 z-50 bg-transparent mb-4`}
               >
-                <div className="flex  flex-row gap-x-[0.6rem] bg-[#23292f] rounded-lg p-2 emoji-panel">
-                  <div
-                    onClick={() => handleEmojiClick(msg.id, "❤️")}
-                    className="cursor-pointer hover:scale-110 transition-transform"
-                  >
-                    ❤️
-                  </div>
-                  <div
-                    onClick={() => handleEmojiClick(msg.id, "😆")}
-                    className="cursor-pointer hover:scale-110 transition-transform"
-                  >
-                    😆
-                  </div>
-                  <div
-                    onClick={() => handleEmojiClick(msg.id, "😮")}
-                    className="cursor-pointer hover:scale-110 transition-transform"
-                  >
-                    😮
-                  </div>
-                  <div
-                    onClick={() => handleEmojiClick(msg.id, "😢")}
-                    className="cursor-pointer hover:scale-110 transition-transform"
-                  >
-                    😢
-                  </div>
-                  <div
-                    onClick={() => handleEmojiClick(msg.id, "😡")}
-                    className="cursor-pointer hover:scale-110 transition-transform"
-                  >
-                    😡
-                  </div>
+                <div className="flex  flex-row gap-x-[0.3rem] bg-[#23292f] rounded-full px-2 py-1 emoji-panel">
+                  {["❤️", "😆", "😮", "😢", "😡"].map((emoji) => (
+                    <div
+                      key={emoji}
+                      onClick={() => handleEmojiClick(msg.id, emoji)}
+                      className={`${
+                        msg.reactions[username] === emoji
+                          ? "selected bg-gray-600 "
+                          : ""
+                      } hover:-translate-y-1 cursor-pointer text-[1.4rem] transition-all rounded-xl duration-200 px-1`}
+                    >
+                      {emoji}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
             <div className="flex flex-col items-end  relative">
               {msg.type === "text" && (
                 <div
-                  className={`flex flex-col ${
+                  className={`flex message flex-col bg-gray-700 p-2 rounded-xl ${
                     msg.username === username ? "items-end" : "items-start"
                   }`}
+                  onMouseDown={(e) => handleMessageContentClick(e, msg.id)} // Regular click
                 >
-                  <div
-                    onMouseDown={(e) => handleMessageContentClick(e, msg.id)} // Regular click
-                    className="message flex flex-row items-center md:max-w-xs max-w-[15rem] justify-between gap-x-3 bg-gray-700 p-2 rounded-lg "
-                  >
+                  <div className=" flex flex-row items-center md:max-w-xs max-w-[15rem]  justify-between gap-x-3  rounded-xl ">
                     {msg.content.includes("http") ? (
                       <Link
                         href={msg.content}
@@ -217,41 +210,34 @@ export default function ChatBox() {
                         {msg.content}
                       </Link>
                     ) : (
-                      <div className="whitespace-pre-wrap break-words max-w-[15rem]">
+                      <div className="whitespace-pre-wrap break-words md:max-w-[15rem] max-w-[10rem]">
                         {msg.content}
                       </div>
                     )}
-                    <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
-                      <div className="text-xs whitespace-nowrap">
-                        {msg.timestamp}
+                    {!Object.values(msg.reactions).length > 0 && (
+                      <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
+                        <div className="text-xs whitespace-nowrap">
+                          {msg.timestamp}
+                        </div>
+                        {msg.username === username &&
+                          (msg.status === "sent" ? (
+                            <div className="text-sm">
+                              <IoMdCheckmarkCircle />
+                            </div>
+                          ) : msg.status === "sending" ? (
+                            <div className="text-sm">
+                              <MdOutlineRadioButtonUnchecked />
+                            </div>
+                          ) : (
+                            <div className="text-sm">
+                              <RxCrossCircled />
+                            </div>
+                          ))}
                       </div>
-                      {msg.username === username &&
-                        (msg.status === "sent" ? (
-                          <div className="text-sm">
-                            <IoMdCheckmarkCircle />
-                          </div>
-                        ) : msg.status === "sending" ? (
-                          <div className="text-sm">
-                            <MdOutlineRadioButtonUnchecked />
-                          </div>
-                        ) : (
-                          <div className="text-sm">
-                            <RxCrossCircled />
-                          </div>
-                        ))}
-                    </div>
+                    )}
                   </div>
-                  {msg.reactions && (
-                    <div
-                      className={`self-end bg-gray-800 px-2 py-[0.2rem] rounded-lg bg-opacity-80 -translate-y-2 cursor-pointer text-xs hover:scale-110 transition-transform flex items-center`}
-                    >
-                      {Object.entries(msg.reactions).map(
-                        ([user, emoji], index) => (
-                          <span key={index}>{emoji}</span>
-                        )
-                      )}
-                    </div>
-                  )}
+
+                  <ReactionComponent msg={msg} username={username} />
                 </div>
               )}
               {msg.type === "image" && (
