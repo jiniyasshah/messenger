@@ -89,9 +89,12 @@ export default function ChatBox() {
   //     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   //   }
   // }, [messages, imageLoaded, videoLoaded, clickedMessageId]);
-
+  const prevMessagesLength = useRef(messages.length);
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > prevMessagesLength.current) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    prevMessagesLength.current = messages.length;
     setHandleMessageSend(false);
   }, [messages, imageLoaded, videoLoaded, handleMessageSend]);
 
