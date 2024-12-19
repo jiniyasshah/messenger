@@ -4,16 +4,6 @@ import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxCrossCircled } from "react-icons/rx";
 const ReactionComponent = ({ username, msg }) => {
   // Function to count occurrences of each emoji
-  const handleReactionCount = (emoji) => {
-    const reactionCounts = Object.values(reactions).reduce(
-      (acc, currentEmoji) => {
-        acc[currentEmoji] = (acc[currentEmoji] || 0) + 1;
-        return acc;
-      },
-      {}
-    );
-    return reactionCounts[emoji] || 0;
-  };
 
   const generateGradient = (name) => {
     // Simple gradient generation based on name (or initials)

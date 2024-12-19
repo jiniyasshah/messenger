@@ -130,6 +130,7 @@ export const useSendMessage = (username, channel) => {
         }),
         imageCaption: imageCaption || "",
         status: "sending",
+        reactions: {}, // Add reactions object
       };
 
       setMessages((prev) => [...prev, newMessage]);
