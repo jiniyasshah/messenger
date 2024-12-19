@@ -91,15 +91,27 @@ export default function ChatBox() {
   // }, [messages, imageLoaded, videoLoaded, clickedMessageId]);
   const prevMessagesLength = useRef(messages.length);
   useEffect(() => {
-    if (messages.length > prevMessagesLength.current) {
+    if (
+      messages.length > prevMessagesLength.current ||
+      handleMessageSend ||
+      imageLoaded ||
+      videoLoaded
+    ) {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setHandleMessageSend(false);
+      setImageLoaded(false);
+      setVideoLoaded(false);
     }
     prevMessagesLength.current = messages.length;
-    setHandleMessageSend(false);
   }, [messages, imageLoaded, videoLoaded, handleMessageSend]);
 
+  const messageRefs = useRef({});
   // Function to handle regular click on the message
   const handleMessageContentClick = (e, msgId) => {
+    messageRefs.current[msgId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
     e.stopPropagation();
     setClickedMessageId((prev) => (prev != msgId ? msgId : null));
   };
@@ -168,6 +180,7 @@ export default function ChatBox() {
         {messages.map((msg, index) => (
           <div
             key={index}
+            ref={(el) => (messageRefs.current[msg.id] = el)}
             className={`relative flex flex-col ${
               msg.username === username ? "items-end" : "items-start"
             }`}
@@ -215,6 +228,7 @@ export default function ChatBox() {
                         {msg.content}
                       </div>
                     )}
+
                     <ReactionComponent msg={msg} username={username} />
                     {!Object.values(msg.reactions).length > 0 && (
                       <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
@@ -240,17 +254,20 @@ export default function ChatBox() {
                   </div>
                 </div>
               )}
+
               {msg.type === "image" && (
-                <div className="relative rounded-lg max-w-[12rem]  overflow-hidden cursor-pointer">
+                <div className=" relative rounded-lg max-w-[12rem] max-h-[25rem] overflow-hidden cursor-pointer">
                   <img
                     src={msg.content}
                     alt="Uploaded Image"
                     className="w-full h-full object-cover"
                     onClick={() => setSelectedImage(msg.content)} // Set selected image for modal
                     onLoad={handleImageLoad}
+                    onLoadedData={handleImageLoad}
                   />
+
                   {!msg.imageCaption && (
-                    <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute bottom-1 right-1 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
+                    <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 right-2 bg-slate-600 border-xl px-2 py-[0.15rem] rounded-xl opacity-70">
                       {msg.timestamp}
                       {msg.username === username &&
                         (msg.status === "sent" ? (
@@ -262,6 +279,7 @@ export default function ChatBox() {
                         ))}
                     </div>
                   )}
+
                   {msg.imageCaption && (
                     <div className="flex w-full  flex-row text-sm items-center justify-between gap-x-2 bg-gray-700 p-2 ">
                       {msg.imageCaption.includes("http") ? (
@@ -277,6 +295,7 @@ export default function ChatBox() {
                           {msg.imageCaption}
                         </div>
                       )}
+
                       {msg.username === username &&
                         (msg.status === "sent" ? (
                           <div>
