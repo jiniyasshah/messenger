@@ -246,7 +246,7 @@ export default function ChatBox() {
                       )}
 
                       <ReactionComponent msg={msg} username={username} />
-                      {!Object.values(msg.reactions).length > 0 && (
+                      {!(Object.values(msg?.reactions || {}).length > 0) && (
                         <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
                           <div className="text-xs whitespace-nowrap">
                             {msg.timestamp}
@@ -310,29 +310,28 @@ export default function ChatBox() {
                         </div>
                       )}
                       <ReactionComponent msg={msg} username={username} />
-                      {msg.reactions &&
-                        !Object.values(msg.reactions).length > 0 && (
-                          <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
-                            {/* <IoMdOpen  /> */}
-                            <div className="text-xs whitespace-nowrap">
-                              {msg.timestamp}
-                            </div>
-                            {msg.username === username &&
-                              (msg.status === "sent" ? (
-                                <div className="text-sm">
-                                  <IoMdCheckmarkCircle />
-                                </div>
-                              ) : msg.status === "sending" ? (
-                                <div className="text-sm">
-                                  <MdOutlineRadioButtonUnchecked />
-                                </div>
-                              ) : (
-                                <div className="text-sm">
-                                  <RxCrossCircled />
-                                </div>
-                              ))}
+                      {!(Object.values(msg?.reactions || {}).length > 0) && (
+                        <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
+                          {/* <IoMdOpen  /> */}
+                          <div className="text-xs whitespace-nowrap">
+                            {msg.timestamp}
                           </div>
-                        )}
+                          {msg.username === username &&
+                            (msg.status === "sent" ? (
+                              <div className="text-sm">
+                                <IoMdCheckmarkCircle />
+                              </div>
+                            ) : msg.status === "sending" ? (
+                              <div className="text-sm">
+                                <MdOutlineRadioButtonUnchecked />
+                              </div>
+                            ) : (
+                              <div className="text-sm">
+                                <RxCrossCircled />
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* {!msg.imageCaption && (
@@ -416,29 +415,28 @@ export default function ChatBox() {
                         </div>
                       )}
                       <ReactionComponent msg={msg} username={username} />
-                      {msg.reactions &&
-                        !Object.values(msg.reactions).length > 0 && (
-                          <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
-                            {/* <IoMdOpen  /> */}
-                            <div className="text-xs whitespace-nowrap">
-                              {msg.timestamp}
-                            </div>
-                            {msg.username === username &&
-                              (msg.status === "sent" ? (
-                                <div className="text-sm">
-                                  <IoMdCheckmarkCircle />
-                                </div>
-                              ) : msg.status === "sending" ? (
-                                <div className="text-sm">
-                                  <MdOutlineRadioButtonUnchecked />
-                                </div>
-                              ) : (
-                                <div className="text-sm">
-                                  <RxCrossCircled />
-                                </div>
-                              ))}
+                      {!(Object.values(msg?.reactions || {}).length > 0) && (
+                        <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
+                          {/* <IoMdOpen  /> */}
+                          <div className="text-xs whitespace-nowrap">
+                            {msg.timestamp}
                           </div>
-                        )}
+                          {msg.username === username &&
+                            (msg.status === "sent" ? (
+                              <div className="text-sm">
+                                <IoMdCheckmarkCircle />
+                              </div>
+                            ) : msg.status === "sending" ? (
+                              <div className="text-sm">
+                                <MdOutlineRadioButtonUnchecked />
+                              </div>
+                            ) : (
+                              <div className="text-sm">
+                                <RxCrossCircled />
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
