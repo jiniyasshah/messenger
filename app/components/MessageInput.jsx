@@ -2,7 +2,13 @@ import React, { useRef, useEffect, useState } from "react";
 import { MdPhotoSizeSelectActual } from "react-icons/md";
 import { MdSend } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
-const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
+const MessageInput = ({
+  input,
+  setInput,
+  sendMessage,
+  sendFile,
+  setHandleMessageSend,
+}) => {
   const fileInputRef = useRef(null);
   const textAreaRef = useRef(null);
 
@@ -74,7 +80,7 @@ const MessageInput = ({ input, setInput, sendMessage, sendFile }) => {
   // Handle submit button or Enter key
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    setHandleMessageSend(true);
     const hasFile = selectedFile !== null;
     const hasText = input.trim() !== "";
 

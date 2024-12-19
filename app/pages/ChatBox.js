@@ -77,17 +77,23 @@ export default function ChatBox() {
     setCurrentVideo(videoRef);
   };
 
-  const [imageLoaded, setImageLoaded] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const handleImageLoad = () => setImageLoaded(true);
 
-  const [videoLoaded, setVideoLoaded] = useState(true);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const handleVideoLoad = () => setVideoLoaded(true);
 
+  const [handleMessageSend, setHandleMessageSend] = useState(false);
+  // useEffect(() => {
+  //   if (imageLoaded || !messages.some((msg) => msg.type === "image")) {
+  //     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [messages, imageLoaded, videoLoaded, clickedMessageId]);
+
   useEffect(() => {
-    if (imageLoaded || !messages.some((msg) => msg.type === "image")) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, imageLoaded, videoLoaded]);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setHandleMessageSend(false);
+  }, [messages, imageLoaded, videoLoaded, handleMessageSend]);
 
   // Function to handle regular click on the message
   const handleMessageContentClick = (e, msgId) => {
@@ -202,7 +208,7 @@ export default function ChatBox() {
                         {msg.content}
                       </Link>
                     ) : (
-                      <div className="whitespace-pre-wrap break-words md:max-w-xs  max-w-[10rem]">
+                      <div className="whitespace-pre-wrap break-words md:max-w-xs   max-w-[10rem]">
                         {msg.content}
                       </div>
                     )}
@@ -357,6 +363,7 @@ export default function ChatBox() {
         sendFile={sendFile}
         input={input}
         setInput={setInput}
+        setHandleMessageSend={setHandleMessageSend}
       />
 
       {/* Image Modal */}

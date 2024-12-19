@@ -49,7 +49,7 @@ const ReactionComponent = ({ username, msg }) => {
                 className="flex rounded-lg items-center md:px-[0.4rem] px-[0.3rem]  bg-gray-800 bg-opacity-80 gap-x-1"
               >
                 {count > 1 ? (
-                  <div className="flex flex-row gap-x-[0.15rem] items-center">
+                  <div className="flex flex-row  items-center">
                     {emoji}
                     <div
                       className={`rounded-full text-[0.7rem] text-center text-white flex items-center justify-center`}
