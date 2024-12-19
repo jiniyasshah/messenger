@@ -77,6 +77,22 @@ export default function ChatBox() {
     setCurrentVideo(videoRef);
   };
 
+  const generateGradient = (name) => {
+    // Simple gradient generation based on name (or initials)
+    const charCodeSum = name.charCodeAt(0) + name.charCodeAt(name.length - 1); // Simple method of hashing
+    const gradientIndex = charCodeSum % 5; // Limit gradients to 5 possibilities
+
+    const gradients = [
+      "from-emerald-400 to-cyan-400", // Sky to Cyan
+      "from-red-500 to-orange-500", // Pink to Purple
+      "from-fuchsia-500 to-pink-500", // Green to Blue
+      "from-lime-400 to-lime-500", // Yellow to Red
+      "from-emerald-400 to-cyan-400", // Indigo to Purple
+    ];
+
+    return gradients[gradientIndex];
+  };
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const handleImageLoad = () => setImageLoaded(true);
 
@@ -220,121 +236,131 @@ export default function ChatBox() {
                   </div>
                 </div>
               )}{" "}
-              <div className="flex flex-col items-end  relative">
-                {msg.type === "text" && (
+              <div className="flex flex-row items-center gap-x-2">
+                {msg.username !== username && (
                   <div
-                    className={`flex message flex-col bg-gray-700 p-2 rounded-xl ${
-                      msg.username === username ? "items-end" : "items-start"
-                    }`}
-                    onMouseDown={(e) =>
-                      handleMessageContentClick(e, msg.id, msg.type)
-                    } // Regular click
+                    className={`text-xs self-end opa text-white bg-gradient-to-r ${generateGradient(
+                      msg.username
+                    )} rounded-full w-6 h-6 flex items-center justify-center`}
                   >
-                    <div className=" flex flex-wrap space-y-1 items-center md:max-w-xs max-w-[10rem]  justify-between gap-x-2  rounded-xl ">
-                      {msg.content.includes("http") ? (
-                        <Link
-                          href={msg.content}
-                          target="_blank"
-                          className="text-blue-400 underline  break-words"
-                        >
-                          {msg.content}
-                        </Link>
-                      ) : (
-                        <div className="whitespace-pre-wrap break-words md:max-w-xs   max-w-[10rem]">
-                          {msg.content}
-                        </div>
-                      )}
-
-                      <ReactionComponent msg={msg} username={username} />
-                      {!(Object.values(msg?.reactions || {}).length > 0) && (
-                        <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
-                          <div className="text-xs whitespace-nowrap">
-                            {msg.timestamp}
-                          </div>
-                          {msg.username === username &&
-                            (msg.status === "sent" ? (
-                              <div className="text-sm">
-                                <IoMdCheckmarkCircle />
-                              </div>
-                            ) : msg.status === "sending" ? (
-                              <div className="text-sm">
-                                <MdOutlineRadioButtonUnchecked />
-                              </div>
-                            ) : (
-                              <div className="text-sm">
-                                <RxCrossCircled />
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
+                    {msg.username.charAt(0).toUpperCase()}
                   </div>
                 )}
-
-                {msg.type === "image" && (
-                  <div className="relative message bg-gradient-to-r from-violet-600 to-indigo-600  rounded-lg max-w-[12rem]  overflow-hidden cursor-pointer">
-                    <div className=" max-h-[15rem] overflow-hidden relative">
-                      <img
-                        src={msg.content}
-                        alt="Uploaded Image"
-                        className="w-full h-full object-cover rounded-lg bg-gradient-to-r  "
-                        // Set selected image for modal
-                        onLoad={handleImageLoad}
-                        onClick={() => setSelectedImage(msg.content)}
-                      />
-                    </div>
-
+                <div className="flex flex-col items-end  relative">
+                  {msg.type === "text" && (
                     <div
+                      className={`flex message flex-col bg-gray-700 p-2 rounded-xl ${
+                        msg.username === username ? "items-end" : "items-start"
+                      }`}
                       onMouseDown={(e) =>
                         handleMessageContentClick(e, msg.id, msg.type)
-                      }
-                      className={`flex  flex-wrap ${
-                        msg.imageCaption ? "justify-between" : "justify-end"
-                      } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
+                      } // Regular click
                     >
-                      {msg.imageCaption && (
-                        <div className="flex flex-row text-sm items-center justify-between gap-x-2     rounded-b-lg">
-                          {msg.imageCaption.includes("http") ? (
-                            <Link
-                              href={msg.imageCaption}
-                              target="_blank"
-                              className="text-blue-400 underline  break-words"
-                            >
-                              {msg.imageCaption}
-                            </Link>
-                          ) : (
-                            <div className="whitespace-pre-wrap break-words w-full">
-                              {msg.imageCaption}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <ReactionComponent msg={msg} username={username} />
-                      {!(Object.values(msg?.reactions || {}).length > 0) && (
-                        <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
-                          {/* <IoMdOpen  /> */}
-                          <div className="text-xs whitespace-nowrap">
-                            {msg.timestamp}
+                      <div className=" flex flex-wrap space-y-1 items-center md:max-w-xs max-w-[10rem]  justify-between gap-x-2  rounded-xl ">
+                        {msg.content.includes("http") ? (
+                          <Link
+                            href={msg.content}
+                            target="_blank"
+                            className="text-blue-400 underline  break-words"
+                          >
+                            {msg.content}
+                          </Link>
+                        ) : (
+                          <div className="whitespace-pre-wrap break-words md:max-w-xs   max-w-[10rem]">
+                            {msg.content}
                           </div>
-                          {msg.username === username &&
-                            (msg.status === "sent" ? (
-                              <div className="text-sm">
-                                <IoMdCheckmarkCircle />
-                              </div>
-                            ) : msg.status === "sending" ? (
-                              <div className="text-sm">
-                                <MdOutlineRadioButtonUnchecked />
-                              </div>
-                            ) : (
-                              <div className="text-sm">
-                                <RxCrossCircled />
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
+                        )}
 
-                    {/* {!msg.imageCaption && (
+                        <ReactionComponent msg={msg} username={username} />
+                        {!(Object.values(msg?.reactions || {}).length > 0) && (
+                          <div className="flex flex-row self-end text-xs items-center gap-x-1 opacity-70">
+                            <div className="text-xs whitespace-nowrap">
+                              {msg.timestamp}
+                            </div>
+                            {msg.username === username &&
+                              (msg.status === "sent" ? (
+                                <div className="text-sm">
+                                  <IoMdCheckmarkCircle />
+                                </div>
+                              ) : msg.status === "sending" ? (
+                                <div className="text-sm">
+                                  <MdOutlineRadioButtonUnchecked />
+                                </div>
+                              ) : (
+                                <div className="text-sm">
+                                  <RxCrossCircled />
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {msg.type === "image" && (
+                    <div className="relative message bg-gradient-to-r from-violet-600 to-indigo-600  rounded-lg max-w-[12rem]  overflow-hidden cursor-pointer">
+                      <div className=" max-h-[15rem] overflow-hidden relative">
+                        <img
+                          src={msg.content}
+                          alt="Uploaded Image"
+                          className="w-full h-full object-cover rounded-lg bg-gradient-to-r  "
+                          // Set selected image for modal
+                          onLoad={handleImageLoad}
+                          onClick={() => setSelectedImage(msg.content)}
+                        />
+                      </div>
+
+                      <div
+                        onMouseDown={(e) =>
+                          handleMessageContentClick(e, msg.id, msg.type)
+                        }
+                        className={`flex  flex-wrap ${
+                          msg.imageCaption ? "justify-between" : "justify-end"
+                        } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
+                      >
+                        {msg.imageCaption && (
+                          <div className="flex flex-row text-sm items-center justify-between gap-x-2     rounded-b-lg">
+                            {msg.imageCaption.includes("http") ? (
+                              <Link
+                                href={msg.imageCaption}
+                                target="_blank"
+                                className="text-blue-400 underline  break-words"
+                              >
+                                {msg.imageCaption}
+                              </Link>
+                            ) : (
+                              <div className="whitespace-pre-wrap break-words w-full">
+                                {msg.imageCaption}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <ReactionComponent msg={msg} username={username} />
+                        {!(Object.values(msg?.reactions || {}).length > 0) && (
+                          <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
+                            {/* <IoMdOpen  /> */}
+                            <div className="text-xs whitespace-nowrap">
+                              {msg.timestamp}
+                            </div>
+                            {msg.username === username &&
+                              (msg.status === "sent" ? (
+                                <div className="text-sm">
+                                  <IoMdCheckmarkCircle />
+                                </div>
+                              ) : msg.status === "sending" ? (
+                                <div className="text-sm">
+                                  <MdOutlineRadioButtonUnchecked />
+                                </div>
+                              ) : (
+                                <div className="text-sm">
+                                  <RxCrossCircled />
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* {!msg.imageCaption && (
                     <div className="flex flex-row items-center gap-x-2 text-[0.75rem] absolute top-2 left-2 bg-gray-600 border-xl px-2 py-[0.15rem] rounded-xl bg-opacity-90">
                       {msg.timestamp}
                       {msg.username === username &&
@@ -347,7 +373,7 @@ export default function ChatBox() {
                         ))}
                     </div>
                   )} */}
-                    {/* {msg.imageCaption && (
+                      {/* {msg.imageCaption && (
                     <div className="flex w-full  flex-row text-sm items-center justify-between gap-x-2 bg-gray-700 p-2 ">
                       {msg.imageCaption.includes("http") ? (
                         <Link
@@ -378,66 +404,76 @@ export default function ChatBox() {
                         ))}
                     </div>
                   )} */}
-                  </div>
-                )}
-
-                {msg.type === "video" && (
-                  <div className=" relative bg-gradient-to-r from-blue-800 to-indigo-900 rounded-lg max-w-[12rem] max-h-[25rem] overflow-hidden cursor-pointer">
-                    <VideoPlayer
-                      msg={msg}
-                      handleVideoLoad={handleVideoLoad}
-                      handleVideoPlay={handleVideoPlay}
-                    />
-
-                    <div
-                      onMouseDown={(e) =>
-                        handleMessageContentClick(e, msg.id, msg.type)
-                      }
-                      className={`flex  flex-wrap ${
-                        msg.imageCaption ? "justify-between" : "justify-end"
-                      } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
-                    >
-                      {msg.imageCaption && (
-                        <div className="flex flex-row text-sm items-center justify-between gap-x-2     rounded-b-lg mt-1">
-                          {msg.imageCaption.includes("http") ? (
-                            <Link
-                              href={msg.imageCaption}
-                              target="_blank"
-                              className="text-blue-400 underline  break-words"
-                            >
-                              {msg.imageCaption}
-                            </Link>
-                          ) : (
-                            <div className="whitespace-pre-wrap break-words w-full">
-                              {msg.imageCaption}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <ReactionComponent msg={msg} username={username} />
-                      {!(Object.values(msg?.reactions || {}).length > 0) && (
-                        <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
-                          {/* <IoMdOpen  /> */}
-                          <div className="text-xs whitespace-nowrap">
-                            {msg.timestamp}
-                          </div>
-                          {msg.username === username &&
-                            (msg.status === "sent" ? (
-                              <div className="text-sm">
-                                <IoMdCheckmarkCircle />
-                              </div>
-                            ) : msg.status === "sending" ? (
-                              <div className="text-sm">
-                                <MdOutlineRadioButtonUnchecked />
-                              </div>
-                            ) : (
-                              <div className="text-sm">
-                                <RxCrossCircled />
-                              </div>
-                            ))}
-                        </div>
-                      )}
                     </div>
+                  )}
+
+                  {msg.type === "video" && (
+                    <div className=" relative bg-gradient-to-r from-blue-800 to-indigo-900 rounded-lg max-w-[12rem] max-h-[25rem] overflow-hidden cursor-pointer">
+                      <VideoPlayer
+                        msg={msg}
+                        handleVideoLoad={handleVideoLoad}
+                        handleVideoPlay={handleVideoPlay}
+                      />
+
+                      <div
+                        onMouseDown={(e) =>
+                          handleMessageContentClick(e, msg.id, msg.type)
+                        }
+                        className={`flex  flex-wrap ${
+                          msg.imageCaption ? "justify-between" : "justify-end"
+                        } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
+                      >
+                        {msg.imageCaption && (
+                          <div className="flex flex-row text-sm items-center justify-between gap-x-2     rounded-b-lg mt-1">
+                            {msg.imageCaption.includes("http") ? (
+                              <Link
+                                href={msg.imageCaption}
+                                target="_blank"
+                                className="text-blue-400 underline  break-words"
+                              >
+                                {msg.imageCaption}
+                              </Link>
+                            ) : (
+                              <div className="whitespace-pre-wrap break-words w-full">
+                                {msg.imageCaption}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <ReactionComponent msg={msg} username={username} />
+                        {!(Object.values(msg?.reactions || {}).length > 0) && (
+                          <div className="flex  flex-row text-lg  gap-x-1 opacity-70">
+                            {/* <IoMdOpen  /> */}
+                            <div className="text-xs whitespace-nowrap">
+                              {msg.timestamp}
+                            </div>
+                            {msg.username === username &&
+                              (msg.status === "sent" ? (
+                                <div className="text-sm">
+                                  <IoMdCheckmarkCircle />
+                                </div>
+                              ) : msg.status === "sending" ? (
+                                <div className="text-sm">
+                                  <MdOutlineRadioButtonUnchecked />
+                                </div>
+                              ) : (
+                                <div className="text-sm">
+                                  <RxCrossCircled />
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {msg.username == username && (
+                  <div
+                    className={`text-xs self-end text-white bg-gradient-to-r ${generateGradient(
+                      msg.username
+                    )} rounded-full w-6 h-6 flex items-center justify-center`}
+                  >
+                    {msg.username.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
