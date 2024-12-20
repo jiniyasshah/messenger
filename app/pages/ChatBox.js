@@ -12,8 +12,9 @@ import VideoPlayer from "../components/VideoPlayer";
 import { usePusher } from "../hooks/usePusher";
 export default function ChatBox() {
   const params = useParams();
-  const channel = params.channel;
+  const channel = params.channel.replace(/[^a-zA-Z0-9]/g, "specialchars");
 
+  const displayChannel = decodeURIComponent(params.channel).trim();
   const [username, setUsername] = useState("");
   const [clickedMessageId, setClickedMessageId] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -210,7 +211,7 @@ export default function ChatBox() {
               className="bg-gray-800 p-6 rounded-lg shadow-lg w-80"
             >
               <h1 className="text-2xl font-bold mb-4 text-center">
-                Join {channel}
+                Join {displayChannel}
               </h1>
               <div className="flex flex-col gap-4">
                 {/* Name Input */}
@@ -239,7 +240,7 @@ export default function ChatBox() {
 
       {/* Messages */}
       <div className="p-4 bg-gray-900 text-center text-lg font-semibold">
-        Channel: {channel}
+        Channel: {displayChannel}
       </div>
 
       {/* Messages */}
