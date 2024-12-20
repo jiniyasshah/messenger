@@ -414,7 +414,7 @@ export default function ChatBox() {
                           } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
                         >
                           {msg.imageCaption && (
-                            <div className="flex flex-row text-sm items-center justify-between gap-x-2     rounded-b-lg">
+                            <div className="flex flex-row text-[0.95rem] items-center justify-between gap-x-2     rounded-b-lg">
                               {msg.imageCaption.includes("http") ? (
                                 <Link
                                   href={msg.imageCaption}
@@ -505,7 +505,7 @@ export default function ChatBox() {
                     )}
 
                     {msg.type === "video" && (
-                      <div className=" relative bg-gradient-to-r from-blue-800 to-indigo-900 rounded-lg max-w-[12rem] max-h-[25rem] overflow-hidden cursor-pointer">
+                      <div className=" relative bg-gradient-to-r from-blue-800 to-indigo-900 rounded-lg max-w-[12rem]  overflow-hidden cursor-pointer">
                         <VideoPlayer
                           msg={msg}
                           handleVideoLoad={handleVideoLoad}
@@ -521,7 +521,7 @@ export default function ChatBox() {
                           } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
                         >
                           {msg.imageCaption && (
-                            <div className="flex flex-row text-sm items-center justify-between gap-x-2     rounded-b-lg mt-1">
+                            <div className="flex flex-row text-[0.95rem] items-center justify-between gap-x-2     rounded-b-lg mt-1">
                               {msg.imageCaption.includes("http") ? (
                                 <Link
                                   href={msg.imageCaption}

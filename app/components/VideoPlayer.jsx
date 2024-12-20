@@ -78,7 +78,7 @@ const VideoPlayer = ({
           onLoadedMetadata={handleLoadedMetadata}
           ref={videoRef}
         />
-        <div className="absolute top-1 left-1 text-[0.7rem] opacity-80">
+        <div className="absolute top-1 right-2 text-[0.6rem] opacity-50">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
         <div className="flex flex-row w-full justify-between items-center absolute bottom-1 whitespace-nowrap  text-[0.7rem] opacity-80 px-1">

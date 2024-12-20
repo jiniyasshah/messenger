@@ -110,7 +110,7 @@ const MessageInput = ({
   };
 
   return (
-    <div className="p-4 bg-gray-900 relative">
+    <div className="p-4 bg-gray-900 ">
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         {/* Preview Image Above Textarea */}
@@ -211,7 +211,7 @@ const MessageInput = ({
               onPaste={handlePaste}
               placeholder="Add a caption..."
               rows={1}
-              className="flex-1 w-full p-2 rounded-lg bg-gray-700 text-white focus:outline-none resize-none"
+              className="flex-1  w-full p-2 rounded-lg bg-gray-700 text-white focus:outline-none resize-none"
               style={{
                 maxHeight: "calc(5 * 1.5em)",
                 overflowY: input.split("\n").length > 4 ? "auto" : "hidden",
