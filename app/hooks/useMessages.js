@@ -82,6 +82,7 @@ export const useSendMessage = (username, channel) => {
         status: "sending",
         reactions: {}, // Add reactions object
         activeUsers: activeUsers,
+        messageSeen: false,
       };
 
       setMessages((prev) => [...prev, newMessage]);
@@ -133,6 +134,7 @@ export const useSendMessage = (username, channel) => {
         status: "sending",
         reactions: {}, // Add reactions object
         activeUsers: activeUsers,
+        messageSeen: false,
       };
 
       setMessages((prev) => [...prev, newMessage]);
@@ -236,6 +238,20 @@ export const useSendMessage = (username, channel) => {
     }
   };
 
+  const messageSeen = async (messageId) => {
+    try {
+      // Send the API request
+      const { data } = await axios.patch("/api/messages/seen", {
+        messageId,
+        messageSeen: true,
+      });
+
+      // Update state with confirmed reactions from the server
+    } catch (error) {
+      console.error("Error updating message seen:", error.message || error);
+    }
+  };
+
   return {
     messages,
     setMessages,
@@ -245,5 +261,6 @@ export const useSendMessage = (username, channel) => {
     sendFile,
     fetchMessages,
     addReaction,
+    messageSeen,
   };
 };

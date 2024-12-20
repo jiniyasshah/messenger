@@ -31,6 +31,7 @@ export default function ChatBox() {
     sendMessage,
     sendFile,
     addReaction,
+    messageSeen,
   } = useSendMessage(username, channel);
 
   useEffect(() => {
@@ -156,6 +157,46 @@ export default function ChatBox() {
     }
   };
 
+  const seenMessages = useRef(new Set()); // Set to track seen messages
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Find the corresponding message ID from messageRefs
+            const messageId = Object.keys(messageRefs.current).find(
+              (id) => messageRefs.current[id] === entry.target
+            );
+
+            if (messageId && !seenMessages.current.has(messageId)) {
+              // Add messageId to the seen set
+              seenMessages.current.add(messageId);
+              const message = messages.find((msg) => msg.id === messageId);
+              if (!message.messageSeen && message.username !== username) {
+                messageSeen(messageId);
+              }
+              // Call the callback for the message
+            }
+          }
+        });
+      },
+      { threshold: 0.5 } // Adjust threshold as needed
+    );
+
+    // Observe each message ref
+    Object.values(messageRefs.current).forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      // Unobserve on cleanup
+      Object.values(messageRefs.current).forEach((ref) => {
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, [messages]);
+
   // Add handler for emoji clicks
 
   return (
@@ -221,8 +262,7 @@ export default function ChatBox() {
 
             // Check for conditions: either more than one user or exactly one user
             const shouldDisplayContent =
-              (isUserActive && msg.activeUsers?.length > 1) ||
-              msg.activeUsers?.length === 1;
+              (isUserActive && msg.activeUsers?.length > 1) || !msg.messageSeen;
 
             return (
               <div
