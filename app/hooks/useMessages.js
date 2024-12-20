@@ -66,7 +66,7 @@ export const useSendMessage = (username, channel) => {
 
   // Send a text message
   const sendMessage = useCallback(
-    async (e) => {
+    async (e, activeUsers) => {
       e.preventDefault();
       if (!input.trim()) return;
 
@@ -81,6 +81,7 @@ export const useSendMessage = (username, channel) => {
         }),
         status: "sending",
         reactions: {}, // Add reactions object
+        activeUsers: activeUsers,
       };
 
       setMessages((prev) => [...prev, newMessage]);
@@ -107,7 +108,7 @@ export const useSendMessage = (username, channel) => {
 
   // Send a file
   const sendFile = useCallback(
-    async (file, imageCaption) => {
+    async (file, imageCaption, activeUsers) => {
       if (!file) return;
 
       const filePreviewUrl = URL.createObjectURL(file);
@@ -131,6 +132,7 @@ export const useSendMessage = (username, channel) => {
         imageCaption: imageCaption || "",
         status: "sending",
         reactions: {}, // Add reactions object
+        activeUsers: activeUsers,
       };
 
       setMessages((prev) => [...prev, newMessage]);

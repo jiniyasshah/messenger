@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-
+import usePusher from "../hooks/usePusher";
 export function UsernamePrompt({ channel, onSubmit }) {
   const [tempUsername, setTempUsername] = useState("");
-
+  const { initializePusher } = usePusher(channel);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (tempUsername.trim()) {
+      initializePusher(tempUsername);
       onSubmit(tempUsername);
     }
   };

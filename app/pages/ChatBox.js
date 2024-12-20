@@ -9,6 +9,7 @@ import { MdArrowBack } from "react-icons/md";
 import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
 import VideoPlayer from "../components/VideoPlayer";
+import { usePusher } from "../hooks/usePusher";
 export default function ChatBox() {
   const params = useParams();
   const channel = params.channel;
@@ -16,12 +17,12 @@ export default function ChatBox() {
   const [username, setUsername] = useState("");
   const [clickedMessageId, setClickedMessageId] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedVideo, setSelectedVideo] = useState(null); // State for selected video
+  // State for selected video
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
-
+  const { activeUsers } = usePusher(username);
   const chatEndRef = useRef(null);
-  const videoRef = useRef(null);
+
   const {
     messages,
     fetchMessages,
@@ -214,17 +215,32 @@ export default function ChatBox() {
             const isLastMessageFromUser =
               index === messages.length - 1 ||
               messages[index + 1].username !== msg.username;
+            const isUserActive = msg.activeUsers?.some(
+              (user) => user.username === username
+            );
+
+            // Check for conditions: either more than one user or exactly one user
+            const shouldDisplayContent =
+              (isUserActive && msg.activeUsers?.length > 1) ||
+              msg.activeUsers?.length === 1;
+
             return (
               <div
                 key={index}
                 ref={(el) => (messageRefs.current[msg.id] = el)}
-                className={`relative flex flex-col ${
+                className={`${
+                  shouldDisplayContent ? "" : "hidden"
+                } relative flex flex-col ${
                   msg.username === username ? "items-end" : "items-start"
                 }`}
               >
                 {clickedMessageId === msg.id && (
                   <div
-                    className={`flex flex-col self-center  text-gray-400 z-50 bg-transparent mb-4`}
+                    className={`flex flex-col ${
+                      msg.username === username
+                        ? "md:self-end -translate-x-[10rem]"
+                        : "md:self-start translate-x-[10rem]"
+                    } self-center  text-gray-400 z-50 bg-transparent mb-4`}
                   >
                     <div className="flex  flex-row gap-x-[0.3rem] bg-[#23292f] rounded-full px-2 py-1 emoji-panel">
                       {["❤️", "😆", "😮", "😢", "😡"].map((emoji) => (
@@ -535,6 +551,7 @@ export default function ChatBox() {
           input={input}
           setInput={setInput}
           setHandleMessageSend={setHandleMessageSend}
+          activeUsers={activeUsers}
         />
       )}
 

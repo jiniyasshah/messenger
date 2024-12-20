@@ -8,6 +8,7 @@ const MessageInput = ({
   sendMessage,
   sendFile,
   setHandleMessageSend,
+  activeUsers,
 }) => {
   const fileInputRef = useRef(null);
   const textAreaRef = useRef(null);
@@ -83,9 +84,9 @@ const MessageInput = ({
     setHandleMessageSend(true);
     const hasFile = selectedFile !== null;
     const hasText = input.trim() !== "";
-
+    console.log(activeUsers);
     if (hasFile) {
-      sendFile(selectedFile, hasText ? input : null); // Send file with text only if text exists
+      sendFile(selectedFile, hasText ? input : null, activeUsers); // Send file with text only if text exists
       setSelectedFile(null);
       setPreviewImage(null);
       setPreviewVideo(null);
@@ -93,7 +94,7 @@ const MessageInput = ({
     }
 
     if (hasText && !hasFile) {
-      sendMessage(e); // Send message only if no file was sent
+      sendMessage(e, activeUsers); // Send message only if no file was sent
     }
 
     // Clear the input field after sending the message
