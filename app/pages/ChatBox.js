@@ -238,8 +238,8 @@ export default function ChatBox() {
                   <div
                     className={`flex flex-col ${
                       msg.username === username
-                        ? "md:self-end -translate-x-[10rem]"
-                        : "md:self-start translate-x-[10rem]"
+                        ? "md:self-end md:-translate-x-[10rem]"
+                        : "md:self-start md:translate-x-[10rem]"
                     } self-center  text-gray-400 z-50 bg-transparent mb-4`}
                   >
                     <div className="flex  flex-row gap-x-[0.3rem] bg-[#23292f] rounded-full px-2 py-1 emoji-panel">

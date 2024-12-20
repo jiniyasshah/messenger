@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Real-time Messenger Application
 
-## Getting Started
+A modern real-time chat application built with Next.js and Pusher, featuring a beautiful dark UI and rich messaging capabilities.
 
-First, run the development server:
+## Live Demo
+
+Check out the live demo here: [Live Demo](https://alihs.vercel.app/)
+
+```bash
+https://alihs.vercel.app/
+```
+
+> **Note:** The demo provides a preview of the app's main features.
+
+## Features
+
+- 💬 Real-time messaging
+- 🌓 Dark theme UI
+- 👥 User presence detection
+- 📷 Image sharing with previews
+- 🎥 Video sharing with custom player
+- 😊 Emoji reactions
+- ✅ Message status indicators
+- 🔗 Link previews
+- 📱 Responsive design
+- 💾 File sharing support
+
+## Technologies
+
+- Next.js 13+
+- Pusher for real-time functionality
+- MongoDB for message storage
+- TailwindCSS for styling
+- Cloudinary for media storage
+
+## Setup
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/jiniyasshah/messenger.git
+cd messenger
+```
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Set up environment variables
+
+```bash
+PUSHER_APP_ID=
+NEXT_PUBLIC_PUSHER_APP_KEY=
+PUSHER_SECRET=
+NEXT_PUBLIC_PUSHER_CLUSTER=
+DATABASE_URL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+4.Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. Enter your name and channel on the home page
+2. Start chatting in real-time
+3. Share images and videos by clicking the attachment button
+4. React to messages by clicking on them
+5. See user presence and message status in real-time
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+app/
+├── api/           # API routes
+├── channel/       # Channel pages
+├── components/    # Reusable components
+├── hooks/         # Custom hooks
+└── pages/         # App pages
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Security & Future Goals
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Planned Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- End-to-end encryption
+- Backend user presence logic
+- Message persistence
+- User authentication (optional)
+- Private channels
+- Group chat support
+- Voice messages
+- Video calls
 
-## Deploy on Vercel
+### Security Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Implement E2E encryption using Signal Protocol
+- Secure file sharing
+- Rate limiting
+- Message validation
+- Input sanitization
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Screenshots
+
+### Landing Page
+
+![Landing Page](./images/SetChannelPage.png)
+
+### Conversation & File Sharing
+
+![Conversation & File Sharing](./images/TwoUserConversation.png)
+
+### Limited Message Visibility
+
+- Only users present during the communication can actually see the message.
+
+![Active Users](./images/NewUserJoins.png)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -am 'Add feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Create a new pull request.
+
+We welcome all contributions! Please make sure your code adheres to the existing coding style, and include tests for new functionality where applicable.
