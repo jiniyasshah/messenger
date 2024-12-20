@@ -229,8 +229,10 @@ export default function ChatBox() {
                 key={index}
                 ref={(el) => (messageRefs.current[msg.id] = el)}
                 className={`${
-                  shouldDisplayContent ? "" : "hidden"
-                } relative flex flex-col ${
+                  shouldDisplayContent || msg.username === username
+                    ? ""
+                    : "hidden"
+                } relative flex flex-col  ${
                   msg.username === username ? "items-end" : "items-start"
                 }`}
               >
@@ -242,7 +244,7 @@ export default function ChatBox() {
                         : "md:self-start md:translate-x-[10rem]"
                     } self-center  text-gray-400 z-50 bg-transparent mb-4`}
                   >
-                    <div className="flex  flex-row gap-x-[0.3rem] bg-[#23292f] rounded-full px-2 py-1 emoji-panel">
+                    <div className="flex flex-row gap-x-[0.3rem] bg-[#23292f] rounded-full px-2 py-1 emoji-panel">
                       {["❤️", "😆", "😮", "😢", "😡"].map((emoji) => (
                         <div
                           key={emoji}
