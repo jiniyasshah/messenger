@@ -20,7 +20,7 @@ export default function ChatBox() {
   // State for selected video
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
-  const { activeUsers } = usePusher(username);
+  const { activeUsers } = usePusher(username, channel);
   const chatEndRef = useRef(null);
 
   const {

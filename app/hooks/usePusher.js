@@ -4,14 +4,14 @@ import PusherClient from "pusher-js";
 
 let pusherInstance = null;
 
-export const usePusher = (currentUsername) => {
+export const usePusher = (currentUsername, channelName) => {
   const [activeUsers, setActiveUsers] = useState([]);
   const [latestActiveUser, setLatestActiveUser] = useState(null);
   const channelRef = useRef(null);
   const heartbeatIntervalRef = useRef(null);
 
   useEffect(() => {
-    if (!currentUsername) return;
+    if (!currentUsername || !channelName) return;
 
     // Initialize Pusher only once
     if (!pusherInstance) {
@@ -29,7 +29,11 @@ export const usePusher = (currentUsername) => {
         await fetch("/api/pusher/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: currentUsername, status }),
+          body: JSON.stringify({
+            username: currentUsername,
+            status,
+            channelName,
+          }),
           keepalive: true,
         });
       } catch (error) {
@@ -39,7 +43,7 @@ export const usePusher = (currentUsername) => {
 
     // Subscribe to channel
     if (!channelRef.current) {
-      channelRef.current = pusherInstance.subscribe("presence");
+      channelRef.current = pusherInstance.subscribe(channelName);
     }
 
     // Set up event handler
@@ -106,7 +110,7 @@ export const usePusher = (currentUsername) => {
       // Set user as offline
       updateUserStatus("offline");
     };
-  }, [currentUsername]);
+  }, [currentUsername, channelName]);
 
   return { activeUsers, latestActiveUser };
 };
