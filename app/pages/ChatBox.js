@@ -10,11 +10,14 @@ import MessageInput from "../components/MessageInput";
 import { useSendMessage } from "../hooks/useMessages";
 import VideoPlayer from "../components/VideoPlayer";
 import { usePusher } from "../hooks/usePusher";
+import { FaCircle } from "react-icons/fa";
 export default function ChatBox() {
   const params = useParams();
   const channel = params.channel.replace(/[^a-zA-Z0-9]/g, "specialchars");
 
-  const displayChannel = decodeURIComponent(params.channel).trim();
+  const displayChannel =
+    decodeURIComponent(params.channel).trim().charAt(0).toUpperCase() +
+    decodeURIComponent(params.channel).slice(1);
   const [username, setUsername] = useState("");
   const [clickedMessageId, setClickedMessageId] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -237,10 +240,36 @@ export default function ChatBox() {
           </div>
         </div>
       )}
+      <div
+        style={{ backgroundImage: "url('/assets/background.png')" }}
+        className="absolute inset-0 bg-cover bg-center"
+      ></div>
+      <div
+        className={`inset-0 absolute ${
+          !selectedImage ? "bg-black bg-opacity-70" : "bg-transparent"
+        }`}
+      ></div>
 
       {/* Messages */}
-      <div className="p-4 bg-gray-900 text-center text-lg font-semibold">
-        Channel: {displayChannel}
+      <div className="relative z-10 px-4 py-3  flex select-none flex-row items-center justify-between bg-[#1a242e] bg-opacity-40 text-sm ">
+        <div className="flex flex-row gap-x-2 items-center ">
+          <div
+            className={`
+          } text-sm text-white bg-gradient-to-r ${generateGradient(
+            channel
+          )} rounded-full w-7 h-7 flex items-center justify-center`}
+          >
+            {channel.charAt(0).toUpperCase()}
+          </div>
+          <div className="text-gray-200 ">{displayChannel}</div>
+        </div>
+        <div className="text-[0.5rem] text-gray-200 flex flex-row items-center gap-x-2">
+          <FaCircle className="text-[#33ff33]" />
+
+          <div className="text-sm">
+            Online: {activeUsers ? activeUsers?.length : 0}{" "}
+          </div>
+        </div>
       </div>
 
       {/* Messages */}
@@ -412,7 +441,7 @@ export default function ChatBox() {
                           }
                           className={`flex  flex-wrap ${
                             msg.imageCaption ? "justify-between" : "justify-end"
-                          } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
+                          } items-center px-[0.5rem] py-[0.16rem] mt-1 space-y-1 gap-x-1`}
                         >
                           {msg.imageCaption && (
                             <div className="flex flex-row text-[0.95rem] items-center justify-between gap-x-2     rounded-b-lg">
@@ -519,10 +548,10 @@ export default function ChatBox() {
                           }
                           className={`flex  flex-wrap ${
                             msg.imageCaption ? "justify-between" : "justify-end"
-                          } items-center px-[0.5rem] py-[0.16rem] space-y-1 gap-x-1`}
+                          } items-center px-[0.5rem] py-[0.16rem] mt-1 space-y-1 gap-x-1`}
                         >
                           {msg.imageCaption && (
-                            <div className="flex flex-row text-[0.95rem] items-center justify-between gap-x-2     rounded-b-lg mt-1">
+                            <div className="flex  flex-row text-[0.95rem] items-center justify-between gap-x-2     rounded-b-lg">
                               {msg.imageCaption.includes("http") ? (
                                 <Link
                                   href={msg.imageCaption}

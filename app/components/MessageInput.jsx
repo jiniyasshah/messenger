@@ -110,7 +110,7 @@ const MessageInput = ({
   };
 
   return (
-    <div className="p-4 bg-gray-900 ">
+    <div className="relative p-4 bg-gray-900  bg-opacity-30 ">
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         {/* Preview Image Above Textarea */}
@@ -164,7 +164,7 @@ const MessageInput = ({
                 setSelectedFile(null);
                 setPreviewFileIcon(null);
               }}
-              className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 hover:bg-red-500"
+              className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 hover:bg-gray-700"
             >
               <RxCross2 />
             </button>
