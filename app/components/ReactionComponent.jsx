@@ -65,23 +65,25 @@ const ReactionComponent = ({ username, msg }) => {
               </div>
             ))}
           </div>
-          <div className=" flex flex-row text-xs items-center gap-x-1 opacity-70">
-            <div className="text-xs whitespace-nowrap">{msg.timestamp}</div>
-            {msg.username === username &&
-              (msg.status === "sent" ? (
-                <div className="text-sm">
-                  <IoMdCheckmarkCircle />
-                </div>
-              ) : msg.status === "sending" ? (
-                <div className="text-sm">
-                  <MdOutlineRadioButtonUnchecked />
-                </div>
-              ) : (
-                <div className="text-sm">
-                  <RxCrossCircled />
-                </div>
-              ))}
-          </div>
+          {msg.type !== "text" && (
+            <div className=" flex flex-row text-xs items-center gap-x-1 opacity-70">
+              <div className="text-xs whitespace-nowrap">{msg.timestamp}</div>
+              {msg.username === username &&
+                (msg.status === "sent" ? (
+                  <div className="text-sm">
+                    <IoMdCheckmarkCircle />
+                  </div>
+                ) : msg.status === "sending" ? (
+                  <div className="text-sm">
+                    <MdOutlineRadioButtonUnchecked />
+                  </div>
+                ) : (
+                  <div className="text-sm">
+                    <RxCrossCircled />
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
     </>
