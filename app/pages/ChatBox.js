@@ -273,7 +273,7 @@ export default function ChatBox() {
                     ? ""
                     : "hidden"
                 } relative flex flex-col  ${
-                  msg.username === username ? "items-end" : "items-start"
+                  msg.username === username ? "items-end" : "items-start "
                 }`}
               >
                 {clickedMessageId === msg.id && (
@@ -330,7 +330,11 @@ export default function ChatBox() {
                   <div className="flex flex-col items-end  relative">
                     {msg.type === "text" && (
                       <div
-                        className={`flex message flex-col bg-gray-700 p-2 rounded-xl ${
+                        className={`flex message flex-col  ${
+                          msg.username === username
+                            ? "bg-gradient-to-t from-violet-600 to-indigo-600"
+                            : "bg-gray-700"
+                        } p-2 rounded-xl ${
                           msg.username === username
                             ? "items-end"
                             : "items-start"
