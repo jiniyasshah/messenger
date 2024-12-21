@@ -11,6 +11,7 @@ import { useSendMessage } from "../hooks/useMessages";
 import VideoPlayer from "../components/VideoPlayer";
 import { usePusher } from "../hooks/usePusher";
 import { FaCircle } from "react-icons/fa";
+
 export default function ChatBox() {
   const params = useParams();
   const channel = params.channel.replace(/[^a-zA-Z0-9]/g, "specialchars");
@@ -296,7 +297,9 @@ export default function ChatBox() {
 
             // Check for conditions: either more than one user or exactly one user
             const shouldDisplayContent =
-              (isUserActive && msg.activeUsers?.length > 1) || !msg.messageSeen;
+              (isUserActive && msg.activeUsers?.length > 1) ||
+              !msg.messageSeen ||
+              msg.messageSeen === username;
 
             return (
               <div

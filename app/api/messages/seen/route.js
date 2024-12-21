@@ -21,53 +21,86 @@ async function connectToDB() {
 }
 
 // Helper function for error responses
-function errorResponse(message, status = 400) {
-  return NextResponse.json({ error: message }, { status });
-}
+
+// Helper function for error responses
+const errorResponse = (message, status = 400) => {
+  return NextResponse.json({ success: false, error: message }, { status });
+};
 
 export async function PATCH(request) {
   try {
     const body = await request.json();
-    const { messageId, messageSeen } = body;
+    const { messageId, username } = body;
 
-    // Validate inputs
-    if (!messageId || typeof messageSeen !== "boolean") {
-      return errorResponse("Message ID and valid messageSeen are required.");
+    // Input validation
+    if (!messageId || typeof messageId !== "string") {
+      return errorResponse("Valid messageId is required");
+    }
+
+    if (!username || typeof username !== "string") {
+      return errorResponse("Valid username is required");
     }
 
     const messagesCollection = await connectToDB();
 
-    // Use findOneAndUpdate for atomic operation
+    // Atomic update operation
     const updateResult = await messagesCollection.findOneAndUpdate(
-      { id: messageId, messageSeen: { $ne: true } }, // Only update if not already seen
-      { $set: { messageSeen: true } },
-      { returnDocument: "after" }
+      {
+        id: messageId,
+        messageSeen: { $ne: username }, // Prevent duplicate seen status
+      },
+      {
+        $addToSet: { messageSeenBy: username }, // Add to array of users who've seen
+        $set: {
+          lastSeenAt: new Date(),
+          messageSeen: username, // Maintain backwards compatibility
+        },
+      },
+      {
+        returnDocument: "after",
+        projection: { messageSeenBy: 1, messageSeen: 1 },
+      }
     );
 
-    // If no document was found or updated
+    // Handle case where message doesn't exist or was already seen
     if (!updateResult) {
-      // Check if message exists at all
-      const messageExists = await messagesCollection.findOne({ id: messageId });
+      const messageExists = await messagesCollection.findOne(
+        { id: messageId },
+        { projection: { messageSeen: 1 } }
+      );
+
       if (!messageExists) {
-        return errorResponse("Message not found.", 404);
+        return errorResponse("Message not found", 404);
       }
-      // Message exists but was already seen
-      return NextResponse.json({ success: true, messageSeen: true });
+
+      return NextResponse.json({
+        success: true,
+        messageSeen: messageExists.messageSeen,
+        messageSeenBy: messageExists.messageSeenBy || [],
+      });
     }
 
-    // Trigger Pusher event with consistent channel name
-    await pusher.trigger("message-updates", "message-seen", {
+    // Broadcast update via Pusher
+    const eventData = {
       messageId,
-      messageSeen: true,
+      messageSeen: username,
+      messageSeenBy: updateResult.messageSeenBy,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    await pusher.trigger("message-updates", "message-seen", eventData);
 
     return NextResponse.json({
       success: true,
-      messageSeen: true,
+      ...eventData,
     });
   } catch (error) {
     console.error("Error updating message seen status:", error);
-    return errorResponse("Internal Server Error", 500);
+    return errorResponse(
+      process.env.NODE_ENV === "development"
+        ? error.message
+        : "Internal Server Error",
+      500
+    );
   }
 }
