@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
+import Pusher from "pusher";
 
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+  useTLS: true,
+});
 const uri = process.env.DATABASE_URL;
 let client;
 
@@ -29,31 +37,30 @@ export async function PATCH(request) {
 
     const messagesCollection = await connectToDB();
 
-    // Retrieve the current message
-    const currentMessage = await messagesCollection.findOne({ id: messageId });
-    if (!currentMessage) {
-      return errorResponse("Message not found.", 404);
-    }
+    // Use findOneAndUpdate for atomic operation
+    const updateResult = await messagesCollection.findOneAndUpdate(
+      { id: messageId, messageSeen: { $ne: true } }, // Only update if not already seen
+      { $set: { messageSeen: true } },
+      { returnDocument: "after" }
+    );
 
-    const currentStatus = currentMessage.messageSeen || false;
-
-    // Return early if the message is already seen
-    if (currentStatus === true) {
+    // If no document was found or updated
+    if (!updateResult) {
+      // Check if message exists at all
+      const messageExists = await messagesCollection.findOne({ id: messageId });
+      if (!messageExists) {
+        return errorResponse("Message not found.", 404);
+      }
+      // Message exists but was already seen
       return NextResponse.json({ success: true, messageSeen: true });
     }
 
-    // Update the message as seen
-    const updateResult = await messagesCollection.updateOne(
-      { id: messageId },
-      { $set: { messageSeen: true } }
-    );
-
-    if (!updateResult.matchedCount) {
-      return errorResponse("Failed to update message seen status.", 500);
-    }
-
-    // Notify others via Pusher if required
-    // Example: await pusher.trigger("channel", "message-seen", { messageId });
+    // Trigger Pusher event with consistent channel name
+    await pusher.trigger("message-updates", "message-seen", {
+      messageId,
+      messageSeen: true,
+      timestamp: new Date().toISOString(),
+    });
 
     return NextResponse.json({
       success: true,

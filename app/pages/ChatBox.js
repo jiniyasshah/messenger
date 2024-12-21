@@ -264,7 +264,11 @@ export default function ChatBox() {
           <div className="text-gray-200 ">{displayChannel}</div>
         </div>
         <div className="text-[0.5rem] text-gray-200 flex flex-row items-center gap-x-2">
-          <FaCircle className="text-[#33ff33]" />
+          <FaCircle
+            className={`${
+              activeUsers?.length > 0 ? "text-[#33ff33]" : "text-gray-500"
+            }`}
+          />
 
           <div className="text-sm">
             Online: {activeUsers ? activeUsers?.length : 0}{" "}

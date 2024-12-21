@@ -33,11 +33,14 @@ export const useSendMessage = (username, channel) => {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
     });
 
-    // Subscribe to the main channel
-    const messageChannel = pusher.subscribe(channel);
+    // Use a consistent channel structure
+    const channels = {
+      messages: pusher.subscribe(channel),
+      updates: pusher.subscribe("message-updates"),
+    };
 
-    // Bind to the new-message event
-    messageChannel.bind("new-message", (data) => {
+    // Message events
+    channels.messages.bind("new-message", (data) => {
       setMessages((prev) => {
         if (!prev.some((msg) => msg.id === data.id)) {
           return [...prev, data];
@@ -46,10 +49,8 @@ export const useSendMessage = (username, channel) => {
       });
     });
 
-    // Subscribe to the reactions channel
+    // Reaction events
     const reactionsChannel = pusher.subscribe("reactions");
-
-    // Bind to the updated event
     reactionsChannel.bind("updated", (data) => {
       const { messageId, reactions } = data;
 
@@ -58,9 +59,22 @@ export const useSendMessage = (username, channel) => {
       );
     });
 
+    // Seen status events
+    channels.updates.bind("message-seen", (data) => {
+      const { messageId, messageSeen } = data;
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, messageSeen } : msg
+        )
+      );
+    });
+
+    // Cleanup
     return () => {
+      Object.values(channels).forEach((channel) => channel.unbind_all());
       pusher.unsubscribe(channel);
       pusher.unsubscribe("reactions");
+      pusher.unsubscribe("message-updates");
     };
   }, [channel]);
 
