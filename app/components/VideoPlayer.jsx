@@ -85,7 +85,7 @@ const VideoPlayer = ({
           {" "}
           <div className="video-controls  flex flex-row items-center  gap-x-2">
             {/* Play/Pause button */}
-            <div className="flex flex-row items-center gap-x-2 text-xl">
+            <div className="flex flex-row items-center gap-x-2 text-[1.35rem]">
               {isPlaying ? (
                 <button onClick={handlePause}>
                   <MdOutlinePauseCircleFilled />
