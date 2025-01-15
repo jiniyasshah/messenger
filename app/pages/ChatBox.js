@@ -305,11 +305,7 @@ export default function ChatBox() {
               <div
                 key={index}
                 ref={(el) => (messageRefs.current[msg.id] = el)}
-                className={`${
-                  shouldDisplayContent || msg.username === username
-                    ? ""
-                    : "hidden"
-                } relative flex flex-col  ${
+                className={` relative flex flex-col  ${
                   msg.username === username ? "items-end" : "items-start "
                 }`}
               >
