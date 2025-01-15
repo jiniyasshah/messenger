@@ -178,7 +178,7 @@ export default function ChatBox() {
               // Add messageId to the seen set
               seenMessages.current.add(messageId);
               const message = messages.find((msg) => msg.id === messageId);
-              if (!message.messageSeen && message.username !== username) {
+              if (message.username !== username) {
                 messageSeen(messageId);
               }
               // Call the callback for the message
